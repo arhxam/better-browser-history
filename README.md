@@ -1,0 +1,111 @@
+# A Better Browser History
+
+[![CI](https://github.com/arhxam/better-browser-history/actions/workflows/ci.yml/badge.svg)](https://github.com/arhxam/better-browser-history/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](LICENSE)
+
+A local-first, **deterministic** history layer for Chromium browsers (Chrome, Brave, Edge).
+
+Brave (and any browser set to clear history on exit) can leave you with no usable
+history at all. This extension keeps its **own** history in local IndexedDB — captured
+independently of the browser's native store — and builds a richer understanding on top
+of it: full‑text search of page *content*, real time‑on‑page, sessions, navigation
+journeys, dedup with visit counts, tags/notes/stars, and an analytics dashboard.
+
+Everything stays on your device. Nothing is ever sent anywhere.
+
+![Dashboard](bbh-history.png)
+
+## Features
+
+- **Full‑text content search** — searches the actual visible text of every page you
+  visited, not just titles and URLs. Deterministically ranked (TF‑IDF).
+- **Real engagement** — active foreground time per page (idle/blur excluded) and scroll depth.
+- **Sessions** — visits grouped into browsing sessions by a 30‑minute inactivity gap.
+- **Journeys** — navigation trees reconstructed from referrer links and tab‑opener relationships.
+- **Smart dedup** — repeat visits to the same URL collapse into one entry with a visit count.
+- **Analytics** — top sites, activity‑by‑hour heatmap, per‑day trend, and category breakdown.
+- **Tags, notes & stars** — annotate and filter your history.
+- **Three surfaces** — a full‑page **dashboard**, a toolbar **popup**, and a **New Tab** override.
+- **Settings page** — storage overview, retention policy, one‑click JSON export, and clear‑all.
+
+Every derived signal is computed by pure, deterministic rules — no machine learning,
+no network calls, no randomness. The same visits always produce the same views.
+
+## Install (load unpacked)
+
+This extension is meant to be loaded unpacked (it requests broad permissions and is not
+published to the Web Store).
+
+1. Build it:
+   ```bash
+   npm install
+   npm run build
+   ```
+   This produces a `dist/` folder — the unpacked extension.
+2. Open your browser's extensions page:
+   - Chrome / Brave / Edge: go to **`chrome://extensions`** (Brave: `brave://extensions`).
+3. Turn on **Developer mode** (top‑right toggle).
+4. Click **Load unpacked** and select the `dist/` folder.
+5. The extension starts capturing immediately. Open the toolbar icon for the popup, or
+   open a New Tab / the extension's `dashboard.html` for the full dashboard.
+
+> After changing code, re‑run `npm run build` and click the reload icon on the extension card.
+
+## Permissions (and why)
+
+Requested broad because it runs unpacked and needs to observe all browsing:
+
+| Permission | Why |
+|---|---|
+| `<all_urls>` host access + `content_scripts` | capture page content and engagement on every site |
+| `webNavigation`, `tabs` | record every navigation and resolve tab‑opener journeys |
+| `history` | optional backfill / parity with the native store |
+| `storage`, `unlimitedStorage` | keep a large local history in IndexedDB |
+| `idle` | exclude away‑from‑keyboard time from dwell |
+| `alarms` | periodic retention pruning (off by default) |
+| `scripting`, `contextMenus`, `favicon` | supporting UX |
+
+## Privacy
+
+All data lives in the extension's local IndexedDB. There are no analytics, no telemetry,
+and no outbound requests for your history data — the code contains no calls to remote
+origins for stored data. You can clear or export everything from the dashboard.
+
+## Development
+
+```bash
+npm install
+npm run dev          # Vite dev server — preview the UI in a normal tab:
+                     #   http://localhost:5173/src/ui/dashboard.html?demo=1
+                     #   http://localhost:5173/src/ui/popup.html?demo=1
+                     #   http://localhost:5173/src/ui/newtab.html?demo=1
+npm run build        # produce dist/ (the unpacked extension)
+npm test             # run the deterministic core + pipeline test suite (Vitest)
+npm run typecheck    # tsc --noEmit
+npm run validate     # validate dist/manifest.json
+npm run determinism  # assert src/core has no nondeterminism/network
+```
+
+The `?demo=1` mode seeds sample data into IndexedDB so the UI renders without loading the
+extension — useful for local preview and screenshots.
+
+## Architecture
+
+```
+src/
+  core/        pure, deterministic logic (no chrome, no network, no randomness)
+               tokenizer · fts · sessionizer · engagement · dedup · journeys · analytics
+  db/          Dexie/IndexedDB schema + repository + demo seed
+  background/  capture pipeline (chrome-free, unit-tested) + MV3 service worker
+  content/     content script: page-text extraction + engagement tracking
+  ui/          React dashboard / popup / newtab (shared app)
+scripts/       build (Vite UI + esbuild worker/content) · manifest · validators
+test/          Vitest suites (core units + headless capture pipeline via fake-indexeddb)
+```
+
+`visits` is the single source of truth; sessions, journeys, dedup and analytics are all
+derived on demand by the deterministic core.
+
+## License
+
+MIT
