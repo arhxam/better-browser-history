@@ -1,0 +1,15 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+*.zip
+
+# logs & os
+*.log
+.DS_Store
+
+# tooling / local (not part of the product)
+.ultragoal/
+.playwright-mcp/
+.conductor/
