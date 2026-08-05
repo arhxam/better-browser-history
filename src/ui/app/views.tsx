@@ -4,11 +4,12 @@ import { EntryRow } from './EntryRow';
 import { BarList, Heatmap } from './charts';
 import { dayKey, dayLabel, clockTime, hostColor, hostInitial, prettyUrl } from './format';
 import { formatDuration } from '../../core/engagement';
+import { Icon } from './Icon';
 
 function EmptyState({ label }: { label: string }) {
   return (
     <div className="empty">
-      <div className="big">🗒️</div>
+      <div className="empty-icon"><Icon name="empty" size={36} /></div>
       <div>{label}</div>
     </div>
   );

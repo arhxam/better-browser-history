@@ -1,12 +1,13 @@
 import type { HistoryFilter, AnalyticsBundle } from '../../db/repository';
+import { Icon, type IconName } from './Icon';
 
 export type ViewId = 'history' | 'sessions' | 'journeys' | 'analytics';
 
-const NAV: { id: ViewId; icon: string; label: string }[] = [
-  { id: 'history', icon: '🕘', label: 'History' },
-  { id: 'sessions', icon: '🧭', label: 'Sessions' },
-  { id: 'journeys', icon: '🌿', label: 'Journeys' },
-  { id: 'analytics', icon: '📊', label: 'Analytics' },
+const NAV: { id: ViewId; icon: IconName; label: string }[] = [
+  { id: 'history', icon: 'history', label: 'History' },
+  { id: 'sessions', icon: 'sessions', label: 'Sessions' },
+  { id: 'journeys', icon: 'journeys', label: 'Journeys' },
+  { id: 'analytics', icon: 'analytics', label: 'Analytics' },
 ];
 
 const RANGES: { label: string; days: number }[] = [
@@ -55,7 +56,7 @@ export function Sidebar({
       <nav className="nav">
         {NAV.map((n) => (
           <button key={n.id} className={`nav-item ${view === n.id ? 'active' : ''}`} onClick={() => setView(n.id)}>
-            <span className="nav-icon">{n.icon}</span>
+            <span className="nav-icon"><Icon name={n.icon} size={17} /></span>
             {n.label}
           </button>
         ))}
@@ -111,7 +112,7 @@ export function Sidebar({
             onChange={(e) => setFilter({ ...filter, starred: e.target.checked || undefined })}
             style={{ accentColor: 'var(--primary)', width: 13, height: 13 }}
           />
-          ★ Starred only
+          <Icon name="star" size={13} /> Starred only
         </label>
       </div>
 
@@ -123,7 +124,7 @@ export function Sidebar({
       )}
 
       <button className="nav-item settings-link" onClick={openSettings}>
-        <span className="nav-icon">⚙︎</span>
+        <span className="nav-icon"><Icon name="settings" size={17} /></span>
         Settings
       </button>
     </aside>

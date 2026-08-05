@@ -1,5 +1,6 @@
 import { useHistory } from './useHistory';
 import { EntryRow } from './EntryRow';
+import { Icon } from './Icon';
 
 /** Compact toolbar popup: quick search over recent history. */
 export function Popup() {
@@ -20,7 +21,7 @@ export function Popup() {
       <div className="popup-head">
         <div className="brand-logo" style={{ width: 26, height: 26, fontSize: 14 }}>H</div>
         <div className="search" style={{ flex: 1, padding: '8px 10px' }}>
-          <span className="hint">🔍</span>
+          <span className="hint"><Icon name="search" size={15} /></span>
           <input
             placeholder="Search your history…"
             value={h.query}
@@ -33,13 +34,15 @@ export function Popup() {
         {h.loading ? (
           <div className="loading">Loading…</div>
         ) : shown.length === 0 ? (
-          <div className="empty"><div className="big">🔎</div><div>{h.query ? 'No matches' : 'No history yet'}</div></div>
+          <div className="empty"><div className="empty-icon"><Icon name="empty" size={30} /></div><div>{h.query ? 'No matches' : 'No history yet'}</div></div>
         ) : (
           shown.map((e) => <EntryRow key={e.url} entry={e} onToggleStar={h.toggleStar} />)
         )}
       </div>
       <div className="popup-foot">
-        <button className="btn" onClick={openDashboard}>Open full dashboard →</button>
+        <button className="btn" onClick={openDashboard}>
+          Open full dashboard <Icon name="external" size={15} />
+        </button>
       </div>
     </div>
   );

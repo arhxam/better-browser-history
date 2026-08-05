@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useHistory } from './useHistory';
 import { Sidebar, type ViewId } from './Sidebar';
 import { HistoryView, SessionsView, JourneysView, AnalyticsView } from './views';
+import { Icon } from './Icon';
 import type { Visit } from '../../core/types';
 
 export function App() {
@@ -29,7 +30,7 @@ export function App() {
       <main className="main">
         <div className="topbar">
           <div className="search">
-            <span className="hint">🔍</span>
+            <span className="hint"><Icon name="search" size={16} /></span>
             <input
               placeholder="Search titles, URLs and page content…"
               value={h.query}
@@ -37,7 +38,9 @@ export function App() {
               autoFocus
             />
             {h.query && (
-              <button className="star-btn" title="Clear" onClick={() => h.setQuery('')}>✕</button>
+              <button className="icon-btn" title="Clear" onClick={() => h.setQuery('')}>
+                <Icon name="close" size={16} />
+              </button>
             )}
           </div>
         </div>

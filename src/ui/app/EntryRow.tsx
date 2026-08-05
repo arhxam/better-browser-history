@@ -1,6 +1,7 @@
 import type { EnrichedEntry } from '../../db/repository';
 import { formatDuration } from '../../core/engagement';
 import { hostColor, hostInitial, prettyUrl, clockTime } from './format';
+import { Icon } from './Icon';
 
 export function EntryRow({
   entry,
@@ -36,7 +37,7 @@ export function EntryRow({
             onToggleStar?.(entry.url, !starred);
           }}
         >
-          {starred ? '★' : '☆'}
+          <Icon name={starred ? 'star-filled' : 'star'} size={16} />
         </button>
       </div>
     </a>
