@@ -1,13 +1,29 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useHistory } from './useHistory';
 import { Sidebar, type ViewId } from './Sidebar';
 import { HistoryView, SessionsView, JourneysView, AnalyticsView } from './views';
 import { Icon } from './Icon';
 import type { Visit } from '../../core/types';
+import { getSettings } from '../../db/repository';
+import { DEFAULT_SETTINGS, type ExtensionSettings } from '../../settings/settings';
 
 export function App() {
-  const h = useHistory();
-  const [view, setView] = useState<ViewId>('history');
+  const [settings, setSettings] = useState<ExtensionSettings | null>(null);
+
+  useEffect(() => {
+    void getSettings().then(setSettings).catch(() => setSettings(DEFAULT_SETTINGS));
+  }, []);
+
+  if (!settings) return <div className="loading">Loading history…</div>;
+  return <Dashboard settings={settings} />;
+}
+
+function Dashboard({ settings }: { settings: ExtensionSettings }) {
+  const initialFilter = settings.defaultRangeDays > 0
+    ? { from: Date.now() - settings.defaultRangeDays * 86400000 }
+    : {};
+  const h = useHistory(initialFilter);
+  const [view, setView] = useState<ViewId>(settings.defaultView);
 
   // Lookup for journey nodes: every filtered visit lives in some session.
   const visitMap = useMemo(() => {

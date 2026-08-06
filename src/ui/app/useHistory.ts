@@ -32,9 +32,9 @@ export interface HistoryState {
   saveAnnotation: (url: string, tags: string[], note: string, starred: boolean) => Promise<void>;
 }
 
-export function useHistory(): HistoryState {
+export function useHistory(initialFilter: HistoryFilter = {}): HistoryState {
   const [query, setQuery] = useState('');
-  const [filter, setFilter] = useState<HistoryFilter>({});
+  const [filter, setFilter] = useState<HistoryFilter>(initialFilter);
   const [entries, setEntries] = useState<EnrichedEntry[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsBundle | null>(null);
   const [sessions, setSessions] = useState<SessionView[]>([]);
