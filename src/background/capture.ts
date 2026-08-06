@@ -9,6 +9,11 @@ import {
   getLatestVisitInTab,
 } from '../db/repository';
 import type { TransitionType, Visit, EngagementEvent, Engagement, Page } from '../core/types';
+import {
+  DEFAULT_SETTINGS,
+  isExcludedUrl,
+  type ExtensionSettings,
+} from '../settings/settings';
 
 /** Shape mirroring chrome.webNavigation onCommitted/onHistoryStateUpdated. */
 export interface NavigationEvent {
@@ -55,9 +60,13 @@ function visitId(ev: NavigationEvent): string {
  * back to the previous visit in the tab, enabling deterministic journeys.
  * Returns the stored visit, or null if the event was ignored.
  */
-export async function recordNavigation(ev: NavigationEvent): Promise<Visit | null> {
+export async function recordNavigation(
+  ev: NavigationEvent,
+  settings: ExtensionSettings = DEFAULT_SETTINGS,
+): Promise<Visit | null> {
   if (ev.frameId !== 0) return null; // top frame only
   if (!isRecordableUrl(ev.url)) return null;
+  if (!settings.captureEnabled || isExcludedUrl(ev.url, settings)) return null;
 
   const transition = mapTransition(ev.transitionType);
   let referringVisitId: string | undefined;
@@ -85,7 +94,10 @@ export async function recordPageContent(input: {
   content: string;
   description?: string;
   capturedAt: number;
-}): Promise<Page> {
+}, settings: ExtensionSettings = DEFAULT_SETTINGS): Promise<Page | null> {
+  if (!settings.captureEnabled || !settings.indexPageContent || isExcludedUrl(input.url, settings)) {
+    return null;
+  }
   return upsertPage(input);
 }
 
@@ -96,7 +108,11 @@ export async function recordPageContent(input: {
 export async function recordEngagement(
   tabId: number,
   events: EngagementEvent[],
+  settings: ExtensionSettings = DEFAULT_SETTINGS,
+  url?: string,
 ): Promise<Engagement | null> {
+  if (!settings.captureEnabled || !settings.trackEngagement) return null;
+  if (url && isExcludedUrl(url, settings)) return null;
   const visit = await getLatestVisitInTab(tabId);
   if (!visit) return null;
   return addEngagement(visit.id, events);

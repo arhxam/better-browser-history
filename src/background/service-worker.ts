@@ -11,7 +11,7 @@ import {
   type NavigationEvent,
 } from './capture';
 import { getDB } from '../db/schema';
-import { pruneBefore } from '../db/repository';
+import { getSettings, pruneBefore, setSettings } from '../db/repository';
 import type { ContentMessage } from '../shared/messages';
 
 const IDLE_SECONDS = 60;
@@ -45,7 +45,7 @@ async function handleNavigation(details: chrome.webNavigation.WebNavigationTrans
     title,
     openerTabId: await getOpenerTabId(details.tabId),
   };
-  await recordNavigation(ev);
+  await recordNavigation(ev, await getSettings());
 }
 
 chrome.webNavigation.onCommitted.addListener((d) => void handleNavigation(d));
@@ -55,15 +55,15 @@ chrome.webNavigation.onHistoryStateUpdated.addListener((d) => void handleNavigat
 chrome.runtime.onMessage.addListener((msg: ContentMessage, sender) => {
   const tabId = sender.tab?.id;
   if (msg.type === 'PAGE_CONTENT') {
-    void recordPageContent({
-      url: msg.url,
-      title: msg.title,
-      content: msg.content,
-      description: msg.description,
-      capturedAt: Date.now(),
-    });
+    void getSettings().then((settings) => recordPageContent({
+        url: msg.url,
+        title: msg.title,
+        content: msg.content,
+        description: msg.description,
+        capturedAt: Date.now(),
+      }, settings));
   } else if (msg.type === 'ENGAGEMENT' && tabId != null) {
-    void recordEngagement(tabId, msg.events);
+    void getSettings().then((settings) => recordEngagement(tabId, msg.events, settings, msg.url));
   }
   return false;
 });
@@ -87,15 +87,20 @@ chrome.idle.setDetectionInterval(IDLE_SECONDS);
 chrome.idle.onStateChanged.addListener((state) => {
   if (activeTabId == null) return;
   const type = state === 'active' ? 'active' : 'idle';
-  void recordEngagement(activeTabId, [{ type, timestamp: Date.now() }]);
+  void Promise.all([getSettings(), chrome.tabs.get(activeTabId).catch(() => undefined)])
+    .then(([settings, tab]) => recordEngagement(
+      activeTabId!,
+      [{ type, timestamp: Date.now() }],
+      settings,
+      tab?.url,
+    ));
 });
 
 // Retention pruning (opt-in; default keeps everything).
 chrome.alarms.create(PRUNE_ALARM, { periodInMinutes: 60 * 12 });
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name !== PRUNE_ALARM) return;
-  const row = await getDB().meta.get('retentionDays');
-  const days = typeof row?.value === 'number' ? row.value : 0;
+  const days = (await getSettings()).retentionDays;
   if (days > 0) await pruneBefore(Date.now() - days * 24 * 60 * 60 * 1000);
 });
 
@@ -106,8 +111,8 @@ chrome.runtime.onInstalled.addListener(async () => {
     contexts: ['action'],
   });
   // Seed sensible defaults if absent.
-  const existing = await getDB().meta.get('retentionDays');
-  if (!existing) await getDB().meta.put({ key: 'retentionDays', value: 0 });
+  const existing = await getDB().meta.get('settings');
+  if (!existing) await setSettings(await getSettings());
 });
 
 chrome.contextMenus.onClicked.addListener((info) => {

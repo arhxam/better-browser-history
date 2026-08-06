@@ -16,6 +16,7 @@ import {
   getAnalytics,
 } from '../src/db/repository';
 import type { EngagementEvent } from '../src/core/types';
+import { normalizeSettings } from '../src/settings/settings';
 
 let dbCounter = 0;
 beforeEach(async () => {
@@ -75,6 +76,26 @@ describe('capture pipeline (recordVisit, headless, independent of native history
     await recordNavigation(nav({ url: 'chrome://settings', tabId: 1, timeStamp: T0 + MIN })); // non-http
     await recordNavigation(nav({ url: 'https://a.com/real', tabId: 1, timeStamp: T0 + 2 * MIN }));
     expect((await getAllVisits()).length).toBe(1);
+  });
+
+  it('does not record visits when capture is disabled', async () => {
+    const settings = normalizeSettings({ captureEnabled: false });
+    const result = await recordNavigation(
+      nav({ url: 'https://private.example/page', tabId: 1, timeStamp: T0 }),
+      settings,
+    );
+    expect(result).toBeNull();
+    expect(await getAllVisits()).toEqual([]);
+  });
+
+  it('does not record visits from excluded hosts or their subdomains', async () => {
+    const settings = normalizeSettings({ excludedHosts: ['example.com'] });
+    const result = await recordNavigation(
+      nav({ url: 'https://docs.example.com/page', tabId: 1, timeStamp: T0 }),
+      settings,
+    );
+    expect(result).toBeNull();
+    expect(await getAllVisits()).toEqual([]);
   });
 
   it('full-text content search finds pages by their body text', async () => {
