@@ -29,6 +29,11 @@ import {
   type Count,
   type OverviewStats,
 } from '../core/analytics';
+import {
+  normalizeSettings,
+  type ExtensionSettings,
+  type RetentionDays,
+} from '../settings/settings';
 
 const MAX_CONTENT_CHARS = 20000;
 const MAX_TOKENS = 1500;
@@ -352,12 +357,32 @@ export async function exportAll(): Promise<ExportBundle> {
 
 /** Retention policy in days; 0 = keep everything (the default). */
 export async function getRetentionDays(): Promise<number> {
-  const row = await db().meta.get('retentionDays');
-  return typeof row?.value === 'number' ? row.value : 0;
+  return (await getSettings()).retentionDays;
 }
 
 export async function setRetentionDays(days: number): Promise<void> {
-  await db().meta.put({ key: 'retentionDays', value: days });
+  const settings = await getSettings();
+  await setSettings({ ...settings, retentionDays: days as RetentionDays });
+}
+
+export async function getSettings(): Promise<ExtensionSettings> {
+  const [settingsRow, legacyRetention] = await Promise.all([
+    db().meta.get('settings'),
+    db().meta.get('retentionDays'),
+  ]);
+  const raw = settingsRow?.value && typeof settingsRow.value === 'object'
+    ? settingsRow.value as Record<string, unknown>
+    : {};
+  return normalizeSettings({
+    ...raw,
+    retentionDays: raw.retentionDays ?? legacyRetention?.value,
+  });
+}
+
+export async function setSettings(settings: ExtensionSettings): Promise<ExtensionSettings> {
+  const normalized = normalizeSettings(settings);
+  await db().meta.put({ key: 'settings', value: normalized });
+  return normalized;
 }
 
 export interface StorageStats extends OverviewStats {
