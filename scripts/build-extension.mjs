@@ -37,7 +37,7 @@ async function run() {
         input: {
           dashboard: resolve(root, 'src/ui/dashboard.html'),
           popup: resolve(root, 'src/ui/popup.html'),
-          newtab: resolve(root, 'src/ui/newtab.html'),
+          history: resolve(root, 'src/ui/history.html'),
           options: resolve(root, 'src/ui/options.html'),
         },
       },

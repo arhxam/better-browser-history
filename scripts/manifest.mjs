@@ -41,7 +41,7 @@ export function buildManifest() {
       128: 'icons/icon128.png',
     },
     chrome_url_overrides: {
-      newtab: 'newtab.html',
+      history: 'history.html',
     },
     options_ui: {
       page: 'options.html',

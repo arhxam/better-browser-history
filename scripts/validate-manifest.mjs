@@ -42,8 +42,12 @@ assert(
 assert(m.background && m.background.service_worker, 'background.service_worker must be set');
 assert(m.action && m.action.default_popup, 'action.default_popup must be set');
 assert(
-  m.chrome_url_overrides && m.chrome_url_overrides.newtab,
-  'chrome_url_overrides.newtab must be set',
+  m.chrome_url_overrides && m.chrome_url_overrides.history,
+  'chrome_url_overrides.history must be set',
+);
+assert(
+  !m.chrome_url_overrides?.newtab,
+  'chrome_url_overrides.newtab must not be set',
 );
 
 const cs = (m.content_scripts || [])[0];
@@ -54,7 +58,7 @@ assert(cs && Array.isArray(cs.js) && cs.js.length > 0, 'content_scripts must dec
 const distFiles = [
   m.background?.service_worker,
   m.action?.default_popup,
-  m.chrome_url_overrides?.newtab,
+  m.chrome_url_overrides?.history,
   ...(cs?.js || []),
 ].filter(Boolean);
 for (const f of distFiles) {
