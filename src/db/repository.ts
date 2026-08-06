@@ -339,20 +339,114 @@ export async function clearAll(): Promise<void> {
 }
 
 export interface ExportBundle {
+  version: 1;
+  exportedAt: string;
   visits: Visit[];
   pages: Page[];
   engagement: Engagement[];
   annotations: Annotation[];
+  settings: ExtensionSettings;
 }
 
 export async function exportAll(): Promise<ExportBundle> {
-  const [visits, pages, engagement, annotations] = await Promise.all([
+  const [visits, pages, engagement, annotations, settings] = await Promise.all([
     db().visits.toArray(),
     db().pages.toArray(),
     db().engagement.toArray(),
     db().annotations.toArray(),
+    getSettings(),
   ]);
-  return { visits, pages, engagement, annotations };
+  return {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    visits,
+    pages,
+    engagement,
+    annotations,
+    settings,
+  };
+}
+
+export interface ImportResult {
+  visits: number;
+  pages: number;
+  engagement: number;
+  annotations: number;
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object' && !Array.isArray(value);
+}
+
+function hasString(row: Record<string, unknown>, key: string): boolean {
+  return typeof row[key] === 'string';
+}
+
+function hasNumber(row: Record<string, unknown>, key: string): boolean {
+  return typeof row[key] === 'number' && Number.isFinite(row[key]);
+}
+
+function isVisit(value: unknown): value is Visit {
+  if (!isObject(value)) return false;
+  return hasString(value, 'id') && hasString(value, 'url') && hasString(value, 'host')
+    && hasString(value, 'title') && hasString(value, 'transition')
+    && hasNumber(value, 'tabId') && hasNumber(value, 'timestamp');
+}
+
+function isPage(value: unknown): value is Page {
+  if (!isObject(value)) return false;
+  return hasString(value, 'url') && hasString(value, 'host') && hasString(value, 'title')
+    && hasString(value, 'content') && Array.isArray(value.tokens)
+    && value.tokens.every((token) => typeof token === 'string')
+    && hasNumber(value, 'lastCapturedAt');
+}
+
+function isEngagement(value: unknown): value is Engagement {
+  if (!isObject(value)) return false;
+  return hasString(value, 'visitId') && hasNumber(value, 'activeMs') && hasNumber(value, 'scrollDepth');
+}
+
+function isAnnotation(value: unknown): value is Annotation {
+  if (!isObject(value)) return false;
+  return hasString(value, 'url') && Array.isArray(value.tags)
+    && value.tags.every((tag) => typeof tag === 'string')
+    && hasString(value, 'note') && typeof value.starred === 'boolean'
+    && hasNumber(value, 'updatedAt');
+}
+
+/** Validate and merge a JSON export. Validation completes before any write. */
+export async function importAll(value: unknown): Promise<ImportResult> {
+  if (!isObject(value)) throw new Error('Invalid import file.');
+  const { visits, pages, engagement, annotations } = value;
+  if (!Array.isArray(visits) || !visits.every(isVisit)
+    || !Array.isArray(pages) || !pages.every(isPage)
+    || !Array.isArray(engagement) || !engagement.every(isEngagement)
+    || !Array.isArray(annotations) || !annotations.every(isAnnotation)) {
+    throw new Error('Invalid import file.');
+  }
+
+  const settings = value.settings == null ? null : normalizeSettings(value.settings);
+  await db().transaction(
+    'rw',
+    db().visits,
+    db().pages,
+    db().engagement,
+    db().annotations,
+    db().meta,
+    async () => {
+      await db().visits.bulkPut(visits);
+      await db().pages.bulkPut(pages);
+      await db().engagement.bulkPut(engagement);
+      await db().annotations.bulkPut(annotations);
+      if (settings) await db().meta.put({ key: 'settings', value: settings });
+    },
+  );
+  return {
+    visits: visits.length,
+    pages: pages.length,
+    engagement: engagement.length,
+    annotations: annotations.length,
+  };
 }
 
 /** Retention policy in days; 0 = keep everything (the default). */
