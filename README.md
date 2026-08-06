@@ -25,8 +25,9 @@ Everything stays on your device. Nothing is ever sent anywhere.
 - **Smart dedup** — repeat visits to the same URL collapse into one entry with a visit count.
 - **Analytics** — top sites, activity‑by‑hour heatmap, per‑day trend, and category breakdown.
 - **Tags, notes & stars** — annotate and filter your history.
-- **Three surfaces** — a full‑page **dashboard**, a toolbar **popup**, and a **New Tab** override.
-- **Settings page** — storage overview, retention policy, one‑click JSON export, and clear‑all.
+- **Native History integration** — `brave://history` / `chrome://history` opens the full dashboard; New Tab remains untouched.
+- **Three surfaces** — the browser **History page**, a full-page **dashboard**, and a toolbar **popup**.
+- **Expanded settings** — capture controls, excluded sites, display defaults, retention, JSON backup/import, and clear-all.
 
 Every derived signal is computed by pure, deterministic rules — no machine learning,
 no network calls, no randomness. The same visits always produce the same views.
@@ -47,7 +48,8 @@ published to the Web Store).
 3. Turn on **Developer mode** (top‑right toggle).
 4. Click **Load unpacked** and select the `dist/` folder.
 5. The extension starts capturing immediately. Open the toolbar icon for the popup, or
-   open a New Tab / the extension's `dashboard.html` for the full dashboard.
+   visit **`brave://history`** / **`chrome://history`** for the full dashboard. Your normal
+   New Tab page is not changed.
 
 > After changing code, re‑run `npm run build` and click the reload icon on the extension card.
 
@@ -78,7 +80,8 @@ npm install
 npm run dev          # Vite dev server — preview the UI in a normal tab:
                      #   http://localhost:5173/src/ui/dashboard.html?demo=1
                      #   http://localhost:5173/src/ui/popup.html?demo=1
-                     #   http://localhost:5173/src/ui/newtab.html?demo=1
+                     #   http://localhost:5173/src/ui/history.html?demo=1
+                     #   http://localhost:5173/src/ui/options.html?demo=1
 npm run build        # produce dist/ (the unpacked extension)
 npm test             # run the deterministic core + pipeline test suite (Vitest)
 npm run typecheck    # tsc --noEmit
@@ -98,7 +101,8 @@ src/
   db/          Dexie/IndexedDB schema + repository + demo seed
   background/  capture pipeline (chrome-free, unit-tested) + MV3 service worker
   content/     content script: page-text extraction + engagement tracking
-  ui/          React dashboard / popup / newtab (shared app)
+  settings/    typed local capture, privacy, display, and retention preferences
+  ui/          React history override / dashboard / popup / settings surfaces
 scripts/       build (Vite UI + esbuild worker/content) · manifest · validators
 test/          Vitest suites (core units + headless capture pipeline via fake-indexeddb)
 ```

@@ -2,7 +2,7 @@
 // pipeline. All history is written to our own IndexedDB store, so it survives
 // even when the browser keeps no native history (e.g. Brave clearing on exit).
 //
-// Extension pages (dashboard/popup/newtab) read the same IndexedDB directly —
+// Extension pages (dashboard/popup/history) read the same IndexedDB directly —
 // they share the extension origin — so there is no query bridge here.
 import {
   recordNavigation,

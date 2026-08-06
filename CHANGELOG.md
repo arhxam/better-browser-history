@@ -4,6 +4,17 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-08-07
+
+### Changed
+- Replaced the New Tab override with the browser History override. New tabs now
+  use the browser's normal page, while `brave://history` and `chrome://history`
+  open Better Browser History.
+- Expanded Settings with capture toggles, page-content and engagement controls,
+  excluded-host privacy rules, default section/time range, and a 30-day retention option.
+- JSON exports now include versioned settings and can be safely imported and merged.
+- Added manifest and capture-pipeline regression checks for the new browser behavior.
+
 ## [1.0.0] - 2026-08-04
 
 ### Added
@@ -25,3 +36,4 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   build, and manifest validation on every push and pull request.
 
 [1.0.0]: https://github.com/arhxam/better-browser-history/releases/tag/v1.0.0
+[1.1.0]: https://github.com/arhxam/better-browser-history/compare/v1.0.0...v1.1.0
