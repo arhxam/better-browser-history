@@ -65,6 +65,14 @@ for (const f of distFiles) {
   assert(fs.existsSync(resolve(root, 'dist', f)), `referenced file missing in dist: ${f}`);
 }
 
+// Keep one inert compatibility page for installations that still have the old
+// New Tab manifest cached. Opening it reloads the extension into this manifest,
+// where New Tab is no longer overridden.
+assert(
+  fs.existsSync(resolve(root, 'dist', 'newtab.html')),
+  'legacy New Tab migration page must exist without being an override',
+);
+
 if (errors.length) {
   console.error('FAIL:\n - ' + errors.join('\n - '));
   process.exit(1);

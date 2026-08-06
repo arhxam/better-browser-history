@@ -4,6 +4,15 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-08-07
+
+### Fixed
+- Added a one-time recovery page for Brave/Chrome installations that cached the
+  removed New Tab override during the v1.1.0 upgrade. The page reloads the
+  extension into its History-only manifest, preventing a missing-file screen.
+- Kept the recovery page outside `chrome_url_overrides`; Better Browser History
+  does not own or modify the browser's normal New Tab page.
+
 ## [1.1.0] - 2026-08-07
 
 ### Changed
@@ -37,3 +46,4 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 [1.0.0]: https://github.com/arhxam/better-browser-history/releases/tag/v1.0.0
 [1.1.0]: https://github.com/arhxam/better-browser-history/compare/v1.0.0...v1.1.0
+[1.1.1]: https://github.com/arhxam/better-browser-history/compare/v1.1.0...v1.1.1
