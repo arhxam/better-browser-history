@@ -53,6 +53,25 @@ published to the Web Store).
 
 > After changing code, re‑run `npm run build` and click the reload icon on the extension card.
 
+### Replacing an older unpacked copy
+
+An unpacked extension stays tied to the folder that was selected when it was loaded.
+Refreshing a tab does **not** reload manifest changes. Before replacing an older copy,
+open the extension's Settings page and **Export JSON** so its local IndexedDB history
+can be restored if the extension ID changes.
+
+1. Run `npm run build && npm run doctor` in the permanent repository. The doctor prints
+   the exact absolute `dist/` folder to select and verifies that New Tab/homepage takeover
+   fields are absent.
+2. Open `brave://extensions`, remove the older Better Browser History copy, then click
+   **Load unpacked** and select the folder printed by the doctor.
+3. Confirm the extension details show the expected version and permanent **Loaded from**
+   path. The permissions list must not say “Replace the page you see when opening a new tab.”
+4. If the extension ID changed, open Settings and **Import JSON** using the backup from step 1.
+
+Always load the permanent repository's `dist/` folder. Do not load a temporary worktree or
+Conductor workspace because that directory can move or be removed.
+
 ## Permissions (and why)
 
 Requested broad because it runs unpacked and needs to observe all browsing:
@@ -86,6 +105,7 @@ npm run build        # produce dist/ (the unpacked extension)
 npm test             # run the deterministic core + pipeline test suite (Vitest)
 npm run typecheck    # tsc --noEmit
 npm run validate     # validate dist/manifest.json
+npm run doctor       # print the exact unpacked folder and assert no New Tab/homepage takeover
 npm run determinism  # assert src/core has no nondeterminism/network
 ```
 
