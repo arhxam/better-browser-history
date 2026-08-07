@@ -3,6 +3,7 @@
 import fs from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { getManifestSafetyErrors } from './manifest-safety.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const manifestPath = resolve(root, 'dist/manifest.json');
@@ -18,6 +19,7 @@ if (!fs.existsSync(manifestPath)) {
 }
 
 const m = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+errors.push(...getManifestSafetyErrors(m));
 
 assert(m.manifest_version === 3, 'manifest_version must be 3');
 
@@ -45,11 +47,6 @@ assert(
   m.chrome_url_overrides && m.chrome_url_overrides.history,
   'chrome_url_overrides.history must be set',
 );
-assert(
-  !m.chrome_url_overrides?.newtab,
-  'chrome_url_overrides.newtab must not be set',
-);
-
 const cs = (m.content_scripts || [])[0];
 assert(cs && Array.isArray(cs.matches) && cs.matches.includes('<all_urls>'), 'content_scripts must match <all_urls>');
 assert(cs && Array.isArray(cs.js) && cs.js.length > 0, 'content_scripts must declare js');
