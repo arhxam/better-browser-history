@@ -7,6 +7,7 @@ import { getManifestSafetyErrors } from './manifest-safety.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const manifestPath = resolve(root, 'dist/manifest.json');
+const packageJson = JSON.parse(fs.readFileSync(resolve(root, 'package.json'), 'utf8'));
 
 const errors = [];
 function assert(cond, msg) {
@@ -22,6 +23,8 @@ const m = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 errors.push(...getManifestSafetyErrors(m));
 
 assert(m.manifest_version === 3, 'manifest_version must be 3');
+assert(m.name === 'Better Browser History', 'manifest name must match the public product name');
+assert(m.version === packageJson.version, 'manifest version must match package.json');
 
 assert(
   Array.isArray(m.host_permissions) && m.host_permissions.includes('<all_urls>'),
@@ -55,7 +58,13 @@ for (const f of distFiles) {
 for (const file of fs.readdirSync(resolve(root, 'dist')).filter((name) => name.endsWith('.html'))) {
   const html = fs.readFileSync(resolve(root, 'dist', file), 'utf8');
   assert(!/rel=["']modulepreload["']/i.test(html), `${file} must not contain modulepreload links`);
+  assert(!/<script[^>]+src=["']https?:\/\//i.test(html), `${file} must not load remote scripts`);
 }
+
+assert(
+  !fs.readdirSync(resolve(root, 'dist'), { recursive: true }).some((name) => String(name).endsWith('.map')),
+  'dist must not contain source maps',
+);
 
 // Keep one inert compatibility page for installations that still have the old
 // New Tab manifest cached. It must explain the manual reinstall without running

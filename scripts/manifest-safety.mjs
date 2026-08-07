@@ -23,6 +23,14 @@ export function getManifestSafetyErrors(manifest) {
     errors.push('chrome_settings_overrides must not be set');
   }
 
+  if (manifest.web_accessible_resources) {
+    errors.push('web_accessible_resources must not be set');
+  }
+
+  if (typeof manifest.description !== 'string' || manifest.description.length < 1 || manifest.description.length > 132) {
+    errors.push('description must be between 1 and 132 characters');
+  }
+
   const actualPermissions = Array.isArray(manifest.permissions) ? manifest.permissions : [];
   const approved = new Set(PRODUCTION_PERMISSIONS);
   if (

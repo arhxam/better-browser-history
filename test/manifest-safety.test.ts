@@ -2,12 +2,16 @@ import { describe, expect, it } from 'vitest';
 // The build tooling is JavaScript so it can run directly under Node.
 // @ts-expect-error JavaScript build helper intentionally has no declaration file.
 import { getManifestSafetyErrors } from '../scripts/manifest-safety.mjs';
+// @ts-expect-error JavaScript build helper intentionally has no declaration file.
+import { buildManifest } from '../scripts/manifest.mjs';
 
 type TestManifest = {
   manifest_version: number;
   permissions: string[];
   chrome_url_overrides: Record<string, string>;
   chrome_settings_overrides?: Record<string, unknown>;
+  description?: string;
+  web_accessible_resources?: unknown[];
 };
 
 function safeManifest(): TestManifest {
@@ -15,6 +19,7 @@ function safeManifest(): TestManifest {
     manifest_version: 3,
     permissions: ['tabs', 'webNavigation', 'unlimitedStorage', 'idle', 'alarms', 'contextMenus'],
     chrome_url_overrides: { history: 'history.html' },
+    description: 'Private browser history search and analytics stored locally on your device.',
   };
 }
 
@@ -62,5 +67,23 @@ describe('manifest takeover safety', () => {
     expect(getManifestSafetyErrors(manifest)).toContain(
       'permissions must exactly match the production allowlist',
     );
+  });
+
+  it('rejects unnecessary web-accessible resources and overlong summaries', () => {
+    const manifest = safeManifest();
+    manifest.web_accessible_resources = [{ resources: ['assets/*'], matches: ['<all_urls>'] }];
+    manifest.description = 'x'.repeat(133);
+    expect(getManifestSafetyErrors(manifest)).toEqual(expect.arrayContaining([
+      'web_accessible_resources must not be set',
+      'description must be between 1 and 132 characters',
+    ]));
+  });
+
+  it('builds the v1.3.0 Chrome Web Store manifest', () => {
+    const manifest = buildManifest();
+    expect(manifest.name).toBe('Better Browser History');
+    expect(manifest.version).toBe('1.3.0');
+    expect(manifest.description.length).toBeLessThanOrEqual(132);
+    expect(manifest.web_accessible_resources).toBeUndefined();
   });
 });
