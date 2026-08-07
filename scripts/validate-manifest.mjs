@@ -49,6 +49,14 @@ for (const f of distFiles) {
   assert(fs.existsSync(resolve(root, 'dist', f)), `referenced file missing in dist: ${f}`);
 }
 
+// Chromium extension pages can report Vite's modulepreload hints as
+// cross-world resource mismatches. Extension scripts load normally without
+// those speculative hints, so keep every emitted HTML page preload-free.
+for (const file of fs.readdirSync(resolve(root, 'dist')).filter((name) => name.endsWith('.html'))) {
+  const html = fs.readFileSync(resolve(root, 'dist', file), 'utf8');
+  assert(!/rel=["']modulepreload["']/i.test(html), `${file} must not contain modulepreload links`);
+}
+
 // Keep one inert compatibility page for installations that still have the old
 // New Tab manifest cached. It must explain the manual reinstall without running
 // code, reloading the extension, or creating replacement tabs.
