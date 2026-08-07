@@ -5,7 +5,7 @@ export function buildManifest() {
   return {
     manifest_version: 3,
     name: 'A Better Browser History',
-    version: '1.1.1',
+    version: '1.1.2',
     description:
       'A local-first, deterministic history layer for Chromium browsers — full-text content search, dwell time, sessions, journeys and analytics.',
     // Broad permissions: loaded unpacked, not for the Web Store.

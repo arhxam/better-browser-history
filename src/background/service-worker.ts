@@ -13,11 +13,25 @@ import {
 import { getDB } from '../db/schema';
 import { getSettings, pruneBefore, setSettings } from '../db/repository';
 import type { ContentMessage } from '../shared/messages';
+import { recoverLegacyNewTabs } from './recover-newtab';
 
 const IDLE_SECONDS = 60;
 const PRUNE_ALARM = 'bbh-prune';
 
 let activeTabId: number | undefined;
+
+// If Brave cached the pre-v1.1 New Tab override, the compatibility page reloads
+// this worker. Replace that one stale extension tab with a browser-owned New Tab.
+void recoverLegacyNewTabs(
+  {
+    query: (query) => chrome.tabs.query(query),
+    create: (options) => chrome.tabs.create(options),
+    remove: (tabId) => chrome.tabs.remove(tabId),
+  },
+  chrome.runtime.getURL('newtab.html'),
+).catch(() => {
+  // Recovery is best-effort; normal capture must still start if a tab vanished.
+});
 
 async function getOpenerTabId(tabId: number): Promise<number | undefined> {
   try {
