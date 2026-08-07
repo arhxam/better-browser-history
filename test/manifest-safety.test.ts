@@ -17,7 +17,7 @@ type TestManifest = {
 function safeManifest(): TestManifest {
   return {
     manifest_version: 3,
-    permissions: ['tabs', 'webNavigation', 'unlimitedStorage', 'idle', 'alarms', 'contextMenus'],
+    permissions: ['webNavigation', 'unlimitedStorage', 'idle', 'alarms', 'contextMenus'],
     chrome_url_overrides: { history: 'history.html' },
     description: 'Private browser history search and analytics stored locally on your device.',
   };

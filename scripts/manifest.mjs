@@ -10,7 +10,6 @@ export function buildManifest() {
       'Search and analyze browser history with full-text search, sessions and time insights—all stored locally on your device.',
     // Least-privilege APIs used by capture, retention, and the toolbar action.
     permissions: [
-      'tabs',
       'webNavigation',
       'unlimitedStorage',
       'idle',

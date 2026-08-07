@@ -66,17 +66,10 @@ assert(
   'dist must not contain source maps',
 );
 
-// Keep one inert compatibility page for installations that still have the old
-// New Tab manifest cached. It must explain the manual reinstall without running
-// code, reloading the extension, or creating replacement tabs.
 assert(
-  fs.existsSync(resolve(root, 'dist', 'newtab.html')),
-  'legacy New Tab migration page must exist without being an override',
+  !fs.existsSync(resolve(root, 'dist', 'newtab.html')),
+  'production package must not contain a New Tab page',
 );
-if (fs.existsSync(resolve(root, 'dist', 'newtab.html'))) {
-  const recoveryHtml = fs.readFileSync(resolve(root, 'dist', 'newtab.html'), 'utf8');
-  assert(!/<script\b/i.test(recoveryHtml), 'legacy New Tab page must not execute scripts');
-}
 
 if (errors.length) {
   console.error('FAIL:\n - ' + errors.join('\n - '));

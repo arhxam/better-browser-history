@@ -1,5 +1,4 @@
 export const PRODUCTION_PERMISSIONS = [
-  'tabs',
   'webNavigation',
   'unlimitedStorage',
   'idle',
