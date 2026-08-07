@@ -53,9 +53,15 @@ export function Sidebar({
         </div>
       </div>
 
-      <nav className="nav">
+      <nav className="nav" aria-label="History views">
         {NAV.map((n) => (
-          <button key={n.id} className={`nav-item ${view === n.id ? 'active' : ''}`} onClick={() => setView(n.id)}>
+          <button
+            key={n.id}
+            className={`nav-item ${view === n.id ? 'active' : ''}`}
+            aria-label={n.label}
+            aria-current={view === n.id ? 'page' : undefined}
+            onClick={() => setView(n.id)}
+          >
             <span className="nav-icon"><Icon name={n.icon} size={17} /></span>
             {n.label}
           </button>
@@ -64,14 +70,15 @@ export function Sidebar({
 
       <div className="filters">
         <div>
-          <div className="filter-label">Time range</div>
-          <div className="chip-row">
+          <div className="filter-label" id="time-range-label">Time range</div>
+          <div className="chip-row" role="group" aria-labelledby="time-range-label">
             {RANGES.map((r) => {
               const active = r.days === 0 ? !filter.from : activeRange === r.days;
               return (
                 <button
                   key={r.label}
                   className={`chip toggle ${active ? 'active' : ''}`}
+                  aria-pressed={active}
                   onClick={() =>
                     setFilter({ ...filter, from: r.days === 0 ? undefined : Date.now() - r.days * 86400000, to: undefined })
                   }
@@ -84,8 +91,8 @@ export function Sidebar({
         </div>
 
         <div>
-          <div className="filter-label">Site</div>
-          <select className="select" value={filter.host ?? ''} onChange={(e) => setFilter({ ...filter, host: e.target.value || undefined })}>
+          <label className="filter-label" htmlFor="history-site-filter">Site</label>
+          <select id="history-site-filter" className="select" value={filter.host ?? ''} onChange={(e) => setFilter({ ...filter, host: e.target.value || undefined })}>
             <option value="">All sites</option>
             {hosts.map((h) => (
               <option key={h} value={h}>{h}</option>
@@ -95,8 +102,8 @@ export function Sidebar({
 
         {tags.length > 0 && (
           <div>
-            <div className="filter-label">Tag</div>
-            <select className="select" value={filter.tag ?? ''} onChange={(e) => setFilter({ ...filter, tag: e.target.value || undefined })}>
+            <label className="filter-label" htmlFor="history-tag-filter">Tag</label>
+            <select id="history-tag-filter" className="select" value={filter.tag ?? ''} onChange={(e) => setFilter({ ...filter, tag: e.target.value || undefined })}>
               <option value="">Any tag</option>
               {tags.map((t) => (
                 <option key={t} value={t}>#{t}</option>
@@ -123,7 +130,7 @@ export function Sidebar({
         </div>
       )}
 
-      <button className="nav-item settings-link" onClick={openSettings}>
+      <button className="nav-item settings-link" aria-label="Settings" onClick={openSettings}>
         <span className="nav-icon"><Icon name="settings" size={17} /></span>
         Settings
       </button>

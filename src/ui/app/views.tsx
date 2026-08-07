@@ -180,7 +180,7 @@ export function AnalyticsView({ analytics }: { analytics: AnalyticsBundle | null
         <h2>Where active time goes</h2>
         <p>Percentages use measured foreground time within the selected filters.</p>
       </div>
-      <div className="grid-2">
+      <div className="grid-2 activity-grid">
         <section className="panel"><h3>Time by category</h3><ShareDonut data={categoryTime} /></section>
         <section className="panel"><h3>Time by site</h3><TimeShareBars data={siteTime} /></section>
       </div>
@@ -189,7 +189,7 @@ export function AnalyticsView({ analytics }: { analytics: AnalyticsBundle | null
         <h2>Activity patterns</h2>
         <p>Daily and weekly rhythms use your local timezone.</p>
       </div>
-      <div className="grid-2">
+      <div className="grid-2 activity-grid">
         <section className="panel"><h3>Active time by day</h3><ActivityTrendChart data={dailyActivity} /></section>
         <section className="panel"><h3>Weekday and hour</h3><WeekActivityHeatmap bins={weeklyActivity} /></section>
       </div>
