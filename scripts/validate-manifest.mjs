@@ -27,8 +27,10 @@ assert(m.name === 'Better Browser History', 'manifest name must match the public
 assert(m.version === packageJson.version, 'manifest version must match package.json');
 
 assert(
-  Array.isArray(m.host_permissions) && m.host_permissions.includes('<all_urls>'),
-  'host_permissions must include <all_urls>',
+  Array.isArray(m.host_permissions)
+    && m.host_permissions.includes('http://*/*')
+    && m.host_permissions.includes('https://*/*'),
+  'host_permissions must include HTTP and HTTPS pages',
 );
 
 assert(m.background && m.background.service_worker, 'background.service_worker must be set');
@@ -38,7 +40,13 @@ assert(
   'chrome_url_overrides.history must be set',
 );
 const cs = (m.content_scripts || [])[0];
-assert(cs && Array.isArray(cs.matches) && cs.matches.includes('<all_urls>'), 'content_scripts must match <all_urls>');
+assert(
+  cs && Array.isArray(cs.matches)
+    && cs.matches.length === 2
+    && cs.matches.includes('http://*/*')
+    && cs.matches.includes('https://*/*'),
+  'content_scripts must match only HTTP and HTTPS pages',
+);
 assert(cs && Array.isArray(cs.js) && cs.js.length > 0, 'content_scripts must declare js');
 
 // Referenced files exist in dist.

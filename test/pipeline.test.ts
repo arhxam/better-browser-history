@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { HistoryDB, setDB } from '../src/db/schema';
+import { getDB, HistoryDB, setDB } from '../src/db/schema';
 import {
   recordNavigation as runRecordNavigation,
   recordPageContent as runRecordPageContent,
@@ -143,6 +143,18 @@ describe('capture pipeline (recordVisit, headless, independent of native history
     );
     expect(result).toBeNull();
     expect(await getAllVisits()).toEqual([]);
+  });
+
+  it('does not store page content from non-web URLs', async () => {
+    const page = await recordPageContent({
+      url: 'file:///Users/example/private-notes.txt',
+      title: 'Private notes',
+      content: 'must not be stored',
+      capturedAt: Date.now(),
+    }, CONSENTED_SETTINGS);
+
+    expect(page).toBeNull();
+    expect(await getDB().pages.count()).toBe(0);
   });
 
   it('full-text content search finds pages by their body text', async () => {

@@ -2,7 +2,7 @@
   "name": "better-browser-history",
   "version": "1.3.0",
   "type": "module",
-  "description": "A Better Browser History — a local-first, deterministic history layer for Chromium browsers (Chrome, Brave, Edge).",
+  "description": "Better Browser History — a local-first, deterministic history layer for Chromium browsers (Chrome, Brave, Edge).",
   "private": true,
   "scripts": {
     "dev": "vite",

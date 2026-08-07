@@ -16,7 +16,7 @@ export function buildManifest() {
       'alarms',
       'contextMenus',
     ],
-    host_permissions: ['<all_urls>'],
+    host_permissions: ['http://*/*', 'https://*/*'],
     background: {
       service_worker: 'service-worker.js',
       type: 'module',
@@ -44,7 +44,7 @@ export function buildManifest() {
     },
     content_scripts: [
       {
-        matches: ['<all_urls>'],
+        matches: ['http://*/*', 'https://*/*'],
         js: ['content-script.js'],
         run_at: 'document_idle',
         all_frames: false,

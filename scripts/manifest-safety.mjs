@@ -6,6 +6,8 @@ export const PRODUCTION_PERMISSIONS = [
   'contextMenus',
 ];
 
+export const PRODUCTION_HOST_PERMISSIONS = ['http://*/*', 'https://*/*'];
+
 export function getManifestSafetyErrors(manifest) {
   const errors = [];
   const overrides = manifest.chrome_url_overrides || {};
@@ -38,6 +40,16 @@ export function getManifestSafetyErrors(manifest) {
     || PRODUCTION_PERMISSIONS.some((permission) => !actualPermissions.includes(permission))
   ) {
     errors.push('permissions must exactly match the production allowlist');
+  }
+
+  const actualHosts = Array.isArray(manifest.host_permissions) ? manifest.host_permissions : [];
+  const approvedHosts = new Set(PRODUCTION_HOST_PERMISSIONS);
+  if (
+    actualHosts.length !== PRODUCTION_HOST_PERMISSIONS.length
+    || actualHosts.some((permission) => !approvedHosts.has(permission))
+    || PRODUCTION_HOST_PERMISSIONS.some((permission) => !actualHosts.includes(permission))
+  ) {
+    errors.push('host_permissions must be limited to HTTP and HTTPS pages');
   }
 
   return errors;

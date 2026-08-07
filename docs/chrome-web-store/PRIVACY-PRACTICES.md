@@ -31,7 +31,7 @@ Paste:
 
 > Used to provide an extension action context-menu command that opens the Better Browser History dashboard.
 
-### Host permission (`<all_urls>`)
+### Host permissions (`http://*/*` and `https://*/*`)
 
 > Required because the extension's user-facing purpose is to create a searchable history across the websites the user chooses to browse. After affirmative consent, the content script can save the current page URL, title, visible text and engagement signals for local search and analytics. Users can pause capture, exclude hostnames, or separately disable content and engagement capture. Protected browser pages remain inaccessible.
 

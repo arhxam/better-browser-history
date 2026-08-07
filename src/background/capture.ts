@@ -96,7 +96,10 @@ export async function recordPageContent(input: {
   description?: string;
   capturedAt: number;
 }, settings: ExtensionSettings = DEFAULT_SETTINGS): Promise<Page | null> {
-  if (!canCapture(settings) || !settings.indexPageContent || isExcludedUrl(input.url, settings)) {
+  if (!isRecordableUrl(input.url)
+    || !canCapture(settings)
+    || !settings.indexPageContent
+    || isExcludedUrl(input.url, settings)) {
     return null;
   }
   return upsertPage(input);

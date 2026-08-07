@@ -1,4 +1,4 @@
-# A Better Browser History
+# Better Browser History
 
 [![CI](https://github.com/arhxam/better-browser-history/actions/workflows/ci.yml/badge.svg)](https://github.com/arhxam/better-browser-history/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](LICENSE)
@@ -86,7 +86,7 @@ The manifest uses an exact least-privilege permission allowlist:
 
 | Permission | Why |
 |---|---|
-| `<all_urls>` host access + `content_scripts` | capture page content and engagement on every site |
+| `http://*/*` and `https://*/*` host access + `content_scripts` | capture page content and engagement on normal web pages; local files and protected browser pages are excluded |
 | `webNavigation` | record top-level navigations; matching host access lets the extension resolve tab-opener journeys without the broader `tabs` permission |
 | `unlimitedStorage` | keep the local IndexedDB history from being evicted under normal quota pressure |
 | `idle` | exclude away‑from‑keyboard time from dwell |

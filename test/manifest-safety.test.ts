@@ -8,6 +8,7 @@ import { buildManifest } from '../scripts/manifest.mjs';
 type TestManifest = {
   manifest_version: number;
   permissions: string[];
+  host_permissions: string[];
   chrome_url_overrides: Record<string, string>;
   chrome_settings_overrides?: Record<string, unknown>;
   description?: string;
@@ -18,6 +19,7 @@ function safeManifest(): TestManifest {
   return {
     manifest_version: 3,
     permissions: ['webNavigation', 'unlimitedStorage', 'idle', 'alarms', 'contextMenus'],
+    host_permissions: ['http://*/*', 'https://*/*'],
     chrome_url_overrides: { history: 'history.html' },
     description: 'Private browser history search and analytics stored locally on your device.',
   };
@@ -66,6 +68,15 @@ describe('manifest takeover safety', () => {
 
     expect(getManifestSafetyErrors(manifest)).toContain(
       'permissions must exactly match the production allowlist',
+    );
+  });
+
+  it('rejects host access outside normal web pages', () => {
+    const manifest = safeManifest();
+    manifest.host_permissions = ['<all_urls>'];
+
+    expect(getManifestSafetyErrors(manifest)).toContain(
+      'host_permissions must be limited to HTTP and HTTPS pages',
     );
   });
 
