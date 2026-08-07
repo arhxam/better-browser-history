@@ -8,18 +8,14 @@ export function buildManifest() {
     version: '1.1.3',
     description:
       'A local-first, deterministic history layer for Chromium browsers — full-text content search, dwell time, sessions, journeys and analytics.',
-    // Broad permissions: loaded unpacked, not for the Web Store.
+    // Least-privilege APIs used by capture, retention, and the toolbar action.
     permissions: [
-      'history',
       'tabs',
       'webNavigation',
-      'storage',
       'unlimitedStorage',
-      'scripting',
       'idle',
       'alarms',
       'contextMenus',
-      'favicon',
     ],
     host_permissions: ['<all_urls>'],
     background: {

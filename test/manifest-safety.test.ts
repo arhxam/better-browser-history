@@ -5,6 +5,7 @@ import { getManifestSafetyErrors } from '../scripts/manifest-safety.mjs';
 
 type TestManifest = {
   manifest_version: number;
+  permissions: string[];
   chrome_url_overrides: Record<string, string>;
   chrome_settings_overrides?: Record<string, unknown>;
 };
@@ -12,6 +13,7 @@ type TestManifest = {
 function safeManifest(): TestManifest {
   return {
     manifest_version: 3,
+    permissions: ['tabs', 'webNavigation', 'unlimitedStorage', 'idle', 'alarms', 'contextMenus'],
     chrome_url_overrides: { history: 'history.html' },
   };
 }
@@ -50,6 +52,15 @@ describe('manifest takeover safety', () => {
 
     expect(getManifestSafetyErrors(manifest)).toContain(
       'chrome_url_overrides may only contain history',
+    );
+  });
+
+  it('rejects permissions outside the production allowlist', () => {
+    const manifest = safeManifest();
+    manifest.permissions.push('history', 'storage', 'scripting', 'favicon');
+
+    expect(getManifestSafetyErrors(manifest)).toContain(
+      'permissions must exactly match the production allowlist',
     );
   });
 });
