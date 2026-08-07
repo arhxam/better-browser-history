@@ -3,6 +3,7 @@
 // never depend on the host machine's locale. Default offset 0 = UTC.
 import type { Visit } from './types';
 import { getHost, getDomain, normalizeUrl } from './url';
+import { assignSessions } from './sessionizer';
 
 export interface Count<T = string> {
   key: T;
@@ -96,4 +97,210 @@ export function overview(visits: Visit[]): OverviewStats {
     if (host) hosts.add(host);
   }
   return { totalVisits: visits.length, uniqueUrls: urls.size, uniqueHosts: hosts.size };
+}
+
+export interface ActivityVisit {
+  visit: Visit;
+  activeMs: number;
+  scrollDepth: number;
+  measured: boolean;
+}
+
+export interface ActivityOverview {
+  totalActiveMs: number;
+  measuredVisits: number;
+  measurementCoverage: number;
+  averageActiveMs: number;
+}
+
+export interface TimeShare {
+  key: string;
+  activeMs: number;
+  percentage: number;
+  visits: number;
+}
+
+export interface ActivityTrend {
+  key: string;
+  activeMs: number;
+  visits: number;
+}
+
+export interface PageTime {
+  url: string;
+  title: string;
+  host: string;
+  activeMs: number;
+  percentage: number;
+  visits: number;
+}
+
+export interface SessionBehavior {
+  sessionCount: number;
+  averageSessionMs: number;
+  longestSessionMs: number;
+  averagePagesPerSession: number;
+  domainSwitches: number;
+}
+
+function safeActiveMs(value: number): number {
+  return Number.isFinite(value) && value > 0 ? value : 0;
+}
+
+export function activityOverview(rows: ActivityVisit[]): ActivityOverview {
+  let totalActiveMs = 0;
+  let measuredVisits = 0;
+  for (const row of rows) {
+    totalActiveMs += safeActiveMs(row.activeMs);
+    if (row.measured) measuredVisits += 1;
+  }
+  return {
+    totalActiveMs,
+    measuredVisits,
+    measurementCoverage: rows.length > 0 ? (measuredVisits / rows.length) * 100 : 0,
+    averageActiveMs: measuredVisits > 0 ? Math.round(totalActiveMs / measuredVisits) : 0,
+  };
+}
+
+function timeShareBy(
+  rows: ActivityVisit[],
+  keyFor: (row: ActivityVisit) => string,
+  limit = 0,
+): TimeShare[] {
+  const grouped = new Map<string, { activeMs: number; visits: number }>();
+  for (const row of rows) {
+    const key = keyFor(row);
+    if (!key) continue;
+    const current = grouped.get(key) ?? { activeMs: 0, visits: 0 };
+    current.activeMs += safeActiveMs(row.activeMs);
+    current.visits += 1;
+    grouped.set(key, current);
+  }
+  const total = Array.from(grouped.values()).reduce((sum, item) => sum + item.activeMs, 0);
+  if (total === 0) return [];
+  const shares = Array.from(grouped.entries())
+    .filter(([, item]) => item.activeMs > 0)
+    .map(([key, item]) => ({
+      key,
+      activeMs: item.activeMs,
+      percentage: (item.activeMs / total) * 100,
+      visits: item.visits,
+    }))
+    .sort((a, b) => b.activeMs - a.activeMs || a.key.localeCompare(b.key));
+  return limit > 0 ? shares.slice(0, limit) : shares;
+}
+
+export function siteTimeShare(rows: ActivityVisit[], limit = 0): TimeShare[] {
+  return timeShareBy(rows, (row) => row.visit.host || getHost(row.visit.url), limit);
+}
+
+export function categoryTimeShare(rows: ActivityVisit[]): TimeShare[] {
+  return timeShareBy(rows, (row) => categorize(row.visit.url));
+}
+
+export function dailyActivity(
+  rows: ActivityVisit[],
+  tzOffsetMinutes = 0,
+): ActivityTrend[] {
+  const grouped = new Map<string, { activeMs: number; visits: number }>();
+  for (const row of rows) {
+    const date = new Date(row.visit.timestamp + tzOffsetMinutes * 60000);
+    const key = date.toISOString().slice(0, 10);
+    const current = grouped.get(key) ?? { activeMs: 0, visits: 0 };
+    current.activeMs += safeActiveMs(row.activeMs);
+    current.visits += 1;
+    grouped.set(key, current);
+  }
+  return Array.from(grouped.entries())
+    .map(([key, value]) => ({ key, ...value }))
+    .sort((a, b) => a.key.localeCompare(b.key));
+}
+
+export function weeklyActivity(
+  rows: ActivityVisit[],
+  tzOffsetMinutes = 0,
+): number[][] {
+  const matrix = Array.from({ length: 7 }, () => new Array<number>(24).fill(0));
+  for (const row of rows) {
+    const date = new Date(row.visit.timestamp + tzOffsetMinutes * 60000);
+    matrix[date.getUTCDay()][date.getUTCHours()] += safeActiveMs(row.activeMs);
+  }
+  return matrix;
+}
+
+export function topPagesByTime(rows: ActivityVisit[], limit = 0): PageTime[] {
+  const grouped = new Map<string, {
+    title: string;
+    host: string;
+    activeMs: number;
+    visits: number;
+    latestTimestamp: number;
+  }>();
+  for (const row of rows) {
+    const url = normalizeUrl(row.visit.url);
+    const current = grouped.get(url) ?? {
+      title: row.visit.title,
+      host: row.visit.host || getHost(url),
+      activeMs: 0,
+      visits: 0,
+      latestTimestamp: Number.NEGATIVE_INFINITY,
+    };
+    current.activeMs += safeActiveMs(row.activeMs);
+    current.visits += 1;
+    if (row.visit.timestamp >= current.latestTimestamp) {
+      current.latestTimestamp = row.visit.timestamp;
+      current.title = row.visit.title;
+      current.host = row.visit.host || getHost(url);
+    }
+    grouped.set(url, current);
+  }
+  const total = Array.from(grouped.values()).reduce((sum, page) => sum + page.activeMs, 0);
+  if (total === 0) return [];
+  const pages = Array.from(grouped.entries())
+    .filter(([, page]) => page.activeMs > 0)
+    .map(([url, page]) => ({
+      url,
+      title: page.title,
+      host: page.host,
+      activeMs: page.activeMs,
+      percentage: (page.activeMs / total) * 100,
+      visits: page.visits,
+    }))
+    .sort((a, b) => b.activeMs - a.activeMs || a.url.localeCompare(b.url));
+  return limit > 0 ? pages.slice(0, limit) : pages;
+}
+
+export function sessionBehavior(visits: Visit[]): SessionBehavior {
+  const { visits: assigned, sessions } = assignSessions(visits);
+  if (sessions.length === 0) {
+    return {
+      sessionCount: 0,
+      averageSessionMs: 0,
+      longestSessionMs: 0,
+      averagePagesPerSession: 0,
+      domainSwitches: 0,
+    };
+  }
+  const visitById = new Map(assigned.map((visit) => [visit.id, visit]));
+  let totalSessionMs = 0;
+  let longestSessionMs = 0;
+  let domainSwitches = 0;
+  for (const session of sessions) {
+    const span = Math.max(0, session.end - session.start);
+    totalSessionMs += span;
+    longestSessionMs = Math.max(longestSessionMs, span);
+    const sessionVisits = session.visitIds
+      .map((id) => visitById.get(id))
+      .filter((visit): visit is Visit => visit != null);
+    for (let index = 1; index < sessionVisits.length; index += 1) {
+      if (sessionVisits[index - 1].host !== sessionVisits[index].host) domainSwitches += 1;
+    }
+  }
+  return {
+    sessionCount: sessions.length,
+    averageSessionMs: Math.round(totalSessionMs / sessions.length),
+    longestSessionMs,
+    averagePagesPerSession: visits.length / sessions.length,
+    domainSwitches,
+  };
 }
