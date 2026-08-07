@@ -33,6 +33,7 @@ async function run() {
     build: {
       outDir: dist,
       emptyOutDir: false,
+      modulePreload: false,
       rollupOptions: {
         input: {
           dashboard: resolve(root, 'src/ui/dashboard.html'),
