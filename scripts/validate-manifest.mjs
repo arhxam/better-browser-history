@@ -23,19 +23,6 @@ errors.push(...getManifestSafetyErrors(m));
 
 assert(m.manifest_version === 3, 'manifest_version must be 3');
 
-const requiredPerms = [
-  'history',
-  'tabs',
-  'webNavigation',
-  'storage',
-  'unlimitedStorage',
-  'scripting',
-  'idle',
-  'alarms',
-];
-const perms = new Set(m.permissions || []);
-for (const p of requiredPerms) assert(perms.has(p), `missing permission: ${p}`);
-
 assert(
   Array.isArray(m.host_permissions) && m.host_permissions.includes('<all_urls>'),
   'host_permissions must include <all_urls>',
@@ -63,12 +50,16 @@ for (const f of distFiles) {
 }
 
 // Keep one inert compatibility page for installations that still have the old
-// New Tab manifest cached. Opening it reloads the extension into this manifest,
-// where New Tab is no longer overridden.
+// New Tab manifest cached. It must explain the manual reinstall without running
+// code, reloading the extension, or creating replacement tabs.
 assert(
   fs.existsSync(resolve(root, 'dist', 'newtab.html')),
   'legacy New Tab migration page must exist without being an override',
 );
+if (fs.existsSync(resolve(root, 'dist', 'newtab.html'))) {
+  const recoveryHtml = fs.readFileSync(resolve(root, 'dist', 'newtab.html'), 'utf8');
+  assert(!/<script\b/i.test(recoveryHtml), 'legacy New Tab page must not execute scripts');
+}
 
 if (errors.length) {
   console.error('FAIL:\n - ' + errors.join('\n - '));

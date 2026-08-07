@@ -61,7 +61,16 @@ function Dashboard({ settings }: { settings: ExtensionSettings }) {
           </div>
         </div>
         <div className="content">
-          {h.loading ? (
+          {h.error && (
+            <div className="load-error" role="alert">
+              <div>
+                <strong>History could not be refreshed</strong>
+                <span>{h.error}</span>
+              </div>
+              <button className="btn compact ghost" onClick={() => void h.reload()}>Retry</button>
+            </div>
+          )}
+          {h.loading && h.entries.length === 0 && !h.analytics ? (
             <div className="loading">Loading history…</div>
           ) : view === 'history' ? (
             <HistoryView entries={h.entries} query={h.query} onToggleStar={h.toggleStar} />

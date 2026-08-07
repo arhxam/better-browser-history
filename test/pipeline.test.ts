@@ -145,11 +145,33 @@ describe('capture pipeline (recordVisit, headless, independent of native history
 
   it('computes analytics over captured visits', async () => {
     await recordNavigation(nav({ url: 'https://github.com/a', tabId: 1, timeStamp: T0, transitionType: 'typed' }));
-    await recordNavigation(nav({ url: 'https://github.com/b', tabId: 1, timeStamp: T0 + MIN }));
-    await recordNavigation(nav({ url: 'https://youtube.com/c', tabId: 1, timeStamp: T0 + 2 * MIN }));
+    await engage(1, T0, 60 * 1000, 0.8);
+    await recordNavigation(nav({ url: 'https://github.com/b', tabId: 2, timeStamp: T0 + MIN }));
+    await engage(2, T0 + MIN, 30 * 1000, 0.4);
+    await recordNavigation(nav({ url: 'https://youtube.com/c', tabId: 3, timeStamp: T0 + 2 * MIN }));
     const a = await getAnalytics();
     expect(a.overview.totalVisits).toBe(3);
     expect(a.topSites[0]).toEqual({ key: 'github.com', count: 2 });
     expect(a.categories.find((c) => c.key === 'Dev')?.count).toBe(2);
+    expect(a.activity).toMatchObject({
+      totalActiveMs: 90000,
+      measuredVisits: 2,
+      averageActiveMs: 45000,
+    });
+    expect(a.activity.measurementCoverage).toBeCloseTo(200 / 3);
+    expect(a.siteTime).toEqual([
+      { key: 'github.com', activeMs: 90000, percentage: 100, visits: 2 },
+    ]);
+    expect(a.categoryTime).toEqual([
+      { key: 'Dev', activeMs: 90000, percentage: 100, visits: 2 },
+    ]);
+    expect(a.topPages.map((page) => page.activeMs)).toEqual([60000, 30000]);
+
+    const githubOnly = await getAnalytics({ host: 'github.com' });
+    expect(githubOnly.overview.totalVisits).toBe(2);
+    expect(githubOnly.activity.measurementCoverage).toBe(100);
+    expect(githubOnly.dailyActivity).toEqual([
+      { key: '2026-01-01', activeMs: 90000, visits: 2 },
+    ]);
   });
 });

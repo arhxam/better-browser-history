@@ -26,8 +26,21 @@ import {
   dailyTrend,
   categoryBreakdown,
   overview,
+  activityOverview,
+  siteTimeShare,
+  categoryTimeShare,
+  dailyActivity,
+  weeklyActivity,
+  topPagesByTime,
+  sessionBehavior,
   type Count,
   type OverviewStats,
+  type ActivityOverview,
+  type TimeShare,
+  type ActivityTrend,
+  type PageTime,
+  type SessionBehavior,
+  type ActivityVisit,
 } from '../core/analytics';
 import {
   normalizeSettings,
@@ -278,6 +291,13 @@ export async function getJourneys(filter: HistoryFilter = {}): Promise<Journey[]
 
 export interface AnalyticsBundle {
   overview: OverviewStats;
+  activity: ActivityOverview;
+  siteTime: TimeShare[];
+  categoryTime: TimeShare[];
+  dailyActivity: ActivityTrend[];
+  weeklyActivity: number[][];
+  topPages: PageTime[];
+  sessionBehavior: SessionBehavior;
   topSites: Count[];
   hourly: number[];
   daily: Count[];
@@ -289,8 +309,22 @@ export async function getAnalytics(
   tzOffsetMinutes = 0,
 ): Promise<AnalyticsBundle> {
   const visits = await getFilteredVisits(filter);
+  const engagement = await db().engagement.bulkGet(visits.map((visit) => visit.id));
+  const activityRows: ActivityVisit[] = visits.map((visit, index) => ({
+    visit,
+    activeMs: engagement[index]?.activeMs ?? 0,
+    scrollDepth: engagement[index]?.scrollDepth ?? 0,
+    measured: engagement[index] != null,
+  }));
   return {
     overview: overview(visits),
+    activity: activityOverview(activityRows),
+    siteTime: siteTimeShare(activityRows, 10),
+    categoryTime: categoryTimeShare(activityRows),
+    dailyActivity: dailyActivity(activityRows, tzOffsetMinutes),
+    weeklyActivity: weeklyActivity(activityRows, tzOffsetMinutes),
+    topPages: topPagesByTime(activityRows, 10),
+    sessionBehavior: sessionBehavior(visits),
     topSites: topSites(visits, 10),
     hourly: hourlyHistogram(visits, tzOffsetMinutes),
     daily: dailyTrend(visits, tzOffsetMinutes),
