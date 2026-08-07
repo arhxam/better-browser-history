@@ -4,6 +4,7 @@ export type RetentionDays = 0 | 30 | 90 | 180 | 365;
 
 export interface ExtensionSettings {
   captureEnabled: boolean;
+  privacyConsentVersion: number;
   indexPageContent: boolean;
   trackEngagement: boolean;
   excludedHosts: string[];
@@ -12,8 +13,11 @@ export interface ExtensionSettings {
   retentionDays: RetentionDays;
 }
 
+export const CURRENT_PRIVACY_CONSENT_VERSION = 1;
+
 export const DEFAULT_SETTINGS: ExtensionSettings = {
-  captureEnabled: true,
+  captureEnabled: false,
+  privacyConsentVersion: 0,
   indexPageContent: true,
   trackEngagement: true,
   excludedHosts: [],
@@ -46,6 +50,11 @@ export function normalizeSettings(value: unknown): ExtensionSettings {
 
   return {
     captureEnabled: typeof input.captureEnabled === 'boolean' ? input.captureEnabled : DEFAULT_SETTINGS.captureEnabled,
+    privacyConsentVersion: typeof input.privacyConsentVersion === 'number'
+      && Number.isInteger(input.privacyConsentVersion)
+      && input.privacyConsentVersion >= 0
+      ? input.privacyConsentVersion
+      : DEFAULT_SETTINGS.privacyConsentVersion,
     indexPageContent: typeof input.indexPageContent === 'boolean' ? input.indexPageContent : DEFAULT_SETTINGS.indexPageContent,
     trackEngagement: typeof input.trackEngagement === 'boolean' ? input.trackEngagement : DEFAULT_SETTINGS.trackEngagement,
     excludedHosts,
@@ -59,6 +68,11 @@ export function normalizeSettings(value: unknown): ExtensionSettings {
       ? input.retentionDays as RetentionDays
       : DEFAULT_SETTINGS.retentionDays,
   };
+}
+
+export function canCapture(settings: ExtensionSettings): boolean {
+  return settings.captureEnabled
+    && settings.privacyConsentVersion >= CURRENT_PRIVACY_CONSENT_VERSION;
 }
 
 export function isExcludedUrl(url: string, settings: ExtensionSettings): boolean {

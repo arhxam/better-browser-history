@@ -4,27 +4,26 @@
 export function buildManifest() {
   return {
     manifest_version: 3,
-    name: 'A Better Browser History',
-    version: '1.2.1',
+    name: 'Better Browser History',
+    version: '1.3.0',
     description:
-      'A local-first, deterministic history layer for Chromium browsers — full-text content search, dwell time, sessions, journeys and analytics.',
+      'Search and analyze browser history with full-text search, sessions and time insights—all stored locally on your device.',
     // Least-privilege APIs used by capture, retention, and the toolbar action.
     permissions: [
-      'tabs',
       'webNavigation',
       'unlimitedStorage',
       'idle',
       'alarms',
       'contextMenus',
     ],
-    host_permissions: ['<all_urls>'],
+    host_permissions: ['http://*/*', 'https://*/*'],
     background: {
       service_worker: 'service-worker.js',
       type: 'module',
     },
     action: {
       default_popup: 'popup.html',
-      default_title: 'A Better Browser History',
+      default_title: 'Better Browser History',
       default_icon: {
         16: 'icons/icon16.png',
         48: 'icons/icon48.png',
@@ -45,16 +44,10 @@ export function buildManifest() {
     },
     content_scripts: [
       {
-        matches: ['<all_urls>'],
+        matches: ['http://*/*', 'https://*/*'],
         js: ['content-script.js'],
         run_at: 'document_idle',
         all_frames: false,
-      },
-    ],
-    web_accessible_resources: [
-      {
-        resources: ['dashboard.html', 'assets/*'],
-        matches: ['<all_urls>'],
       },
     ],
     minimum_chrome_version: '110',

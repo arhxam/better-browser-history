@@ -27,18 +27,39 @@ function chunk(type, data) {
   return Buffer.concat([len, typeBuf, data, crc]);
 }
 
-// Draw a rounded-ish solid tile with a lighter dot (favicon-like clock).
+export function encodeRgbaPng(width, height, rgba) {
+  const rowSize = width * 4 + 1;
+  const raw = Buffer.alloc(height * rowSize);
+  for (let y = 0; y < height; y++) {
+    const rowStart = y * rowSize;
+    raw[rowStart] = 0;
+    rgba.copy(raw, rowStart + 1, y * width * 4, (y + 1) * width * 4);
+  }
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(width, 0);
+  ihdr.writeUInt32BE(height, 4);
+  ihdr[8] = 8;
+  ihdr[9] = 6;
+  const idat = zlib.deflateSync(raw, { level: 9 });
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    chunk('IHDR', ihdr),
+    chunk('IDAT', idat),
+    chunk('IEND', Buffer.alloc(0)),
+  ]);
+}
+
+// Draw the store/extension clock. At 128px the artwork is 96px across,
+// preserving Chrome Web Store's recommended 16px transparent safe area.
 export function makeIcon(size) {
   const bg = [37, 99, 235]; // brand blue
   const fg = [219, 234, 254]; // light blue
-  const raw = Buffer.alloc(size * (size * 4 + 1));
+  const rgba = Buffer.alloc(size * size * 4);
   const cx = size / 2;
   const cy = size / 2;
-  const r = size * 0.42;
-  const handLen = size * 0.30;
+  const r = size * 0.375;
+  const handLen = size * 0.255;
   for (let y = 0; y < size; y++) {
-    const rowStart = y * (size * 4 + 1);
-    raw[rowStart] = 0; // filter type 0
     for (let x = 0; x < size; x++) {
       const dx = x + 0.5 - cx;
       const dy = y + 0.5 - cy;
@@ -55,26 +76,60 @@ export function makeIcon(size) {
         const center = dist < size * 0.08;
         color = onVertical || onHoriz || center ? fg : bg;
       }
-      const o = rowStart + 1 + x * 4;
-      raw[o] = color[0];
-      raw[o + 1] = color[1];
-      raw[o + 2] = color[2];
-      raw[o + 3] = alpha;
+      const o = (y * size + x) * 4;
+      rgba[o] = color[0];
+      rgba[o + 1] = color[1];
+      rgba[o + 2] = color[2];
+      rgba[o + 3] = alpha;
     }
   }
-  const ihdr = Buffer.alloc(13);
-  ihdr.writeUInt32BE(size, 0);
-  ihdr.writeUInt32BE(size, 4);
-  ihdr[8] = 8; // bit depth
-  ihdr[9] = 6; // color type RGBA
-  ihdr[10] = 0;
-  ihdr[11] = 0;
-  ihdr[12] = 0;
-  const idat = zlib.deflateSync(raw, { level: 9 });
-  return Buffer.concat([
-    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
-    chunk('IHDR', ihdr),
-    chunk('IDAT', idat),
-    chunk('IEND', Buffer.alloc(0)),
-  ]);
+  return encodeRgbaPng(size, size, rgba);
+}
+
+// Text-free promotional art: a quiet grid suggests history over time while
+// the clock mark remains legible at both Store-required promo sizes.
+export function makePromo(width, height) {
+  const rgba = Buffer.alloc(width * height * 4);
+  const cx = width / 2;
+  const cy = height / 2;
+  const min = Math.min(width, height);
+  const radius = min * 0.23;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const o = (y * width + x) * 4;
+      const dx = (x - cx) / width;
+      const dy = (y - cy) / height;
+      const glow = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) * 2.6);
+      const grid = x % Math.max(28, Math.round(width / 22)) === 0 || y % Math.max(28, Math.round(height / 12)) === 0;
+      rgba[o] = Math.round(9 + glow * 13 + (grid ? 4 : 0));
+      rgba[o + 1] = Math.round(18 + glow * 31 + (grid ? 5 : 0));
+      rgba[o + 2] = Math.round(34 + glow * 60 + (grid ? 7 : 0));
+      rgba[o + 3] = 255;
+    }
+  }
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const dx = x + 0.5 - cx;
+      const dy = y + 0.5 - cy;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      const o = (y * width + x) * 4;
+      const edge = Math.abs(d - radius) < Math.max(3, min * 0.012);
+      const face = d < radius - Math.max(3, min * 0.012);
+      const vertical = Math.abs(dx) < min * 0.018 && dy < 0 && -dy < radius * 0.58;
+      const horizontal = Math.abs(dy) < min * 0.018 && dx > 0 && dx < radius * 0.54;
+      if (face) {
+        rgba[o] = 37;
+        rgba[o + 1] = 99;
+        rgba[o + 2] = 235;
+      }
+      if (edge || vertical || horizontal || d < min * 0.035) {
+        rgba[o] = 239;
+        rgba[o + 1] = 246;
+        rgba[o + 2] = 255;
+      }
+    }
+  }
+  return encodeRgbaPng(width, height, rgba);
 }

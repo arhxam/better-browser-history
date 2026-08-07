@@ -11,6 +11,7 @@ import {
 import type { TransitionType, Visit, EngagementEvent, Engagement, Page } from '../core/types';
 import {
   DEFAULT_SETTINGS,
+  canCapture,
   isExcludedUrl,
   type ExtensionSettings,
 } from '../settings/settings';
@@ -66,7 +67,7 @@ export async function recordNavigation(
 ): Promise<Visit | null> {
   if (ev.frameId !== 0) return null; // top frame only
   if (!isRecordableUrl(ev.url)) return null;
-  if (!settings.captureEnabled || isExcludedUrl(ev.url, settings)) return null;
+  if (!canCapture(settings) || isExcludedUrl(ev.url, settings)) return null;
 
   const transition = mapTransition(ev.transitionType);
   let referringVisitId: string | undefined;
@@ -95,7 +96,10 @@ export async function recordPageContent(input: {
   description?: string;
   capturedAt: number;
 }, settings: ExtensionSettings = DEFAULT_SETTINGS): Promise<Page | null> {
-  if (!settings.captureEnabled || !settings.indexPageContent || isExcludedUrl(input.url, settings)) {
+  if (!isRecordableUrl(input.url)
+    || !canCapture(settings)
+    || !settings.indexPageContent
+    || isExcludedUrl(input.url, settings)) {
     return null;
   }
   return upsertPage(input);
@@ -111,7 +115,7 @@ export async function recordEngagement(
   settings: ExtensionSettings = DEFAULT_SETTINGS,
   url?: string,
 ): Promise<Engagement | null> {
-  if (!settings.captureEnabled || !settings.trackEngagement) return null;
+  if (!canCapture(settings) || !settings.trackEngagement) return null;
   if (url && isExcludedUrl(url, settings)) return null;
   const visit = await getLatestVisitInTab(tabId);
   if (!visit) return null;

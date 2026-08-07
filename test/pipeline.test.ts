@@ -1,10 +1,10 @@
 import 'fake-indexeddb/auto';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { HistoryDB, setDB } from '../src/db/schema';
+import { getDB, HistoryDB, setDB } from '../src/db/schema';
 import {
-  recordNavigation,
-  recordPageContent,
-  recordEngagement,
+  recordNavigation as runRecordNavigation,
+  recordPageContent as runRecordPageContent,
+  recordEngagement as runRecordEngagement,
   type NavigationEvent,
 } from '../src/background/capture';
 import {
@@ -16,7 +16,11 @@ import {
   getAnalytics,
 } from '../src/db/repository';
 import type { EngagementEvent } from '../src/core/types';
-import { normalizeSettings } from '../src/settings/settings';
+import {
+  CURRENT_PRIVACY_CONSENT_VERSION,
+  normalizeSettings,
+  type ExtensionSettings,
+} from '../src/settings/settings';
 
 let dbCounter = 0;
 beforeEach(async () => {
@@ -27,6 +31,30 @@ beforeEach(async () => {
 
 const T0 = Date.UTC(2026, 0, 1, 9, 0, 0);
 const MIN = 60 * 1000;
+const CONSENTED_SETTINGS = normalizeSettings({
+  captureEnabled: true,
+  privacyConsentVersion: CURRENT_PRIVACY_CONSENT_VERSION,
+});
+
+function recordNavigation(event: NavigationEvent, settings: ExtensionSettings = CONSENTED_SETTINGS) {
+  return runRecordNavigation(event, settings);
+}
+
+function recordPageContent(
+  input: Parameters<typeof runRecordPageContent>[0],
+  settings: ExtensionSettings = CONSENTED_SETTINGS,
+) {
+  return runRecordPageContent(input, settings);
+}
+
+function recordEngagement(
+  tabId: number,
+  events: EngagementEvent[],
+  settings: ExtensionSettings = CONSENTED_SETTINGS,
+  url?: string,
+) {
+  return runRecordEngagement(tabId, events, settings, url);
+}
 
 function nav(p: Partial<NavigationEvent> & { url: string; tabId: number; timeStamp: number }): NavigationEvent {
   return { frameId: 0, transitionType: 'link', ...p };
@@ -88,6 +116,25 @@ describe('capture pipeline (recordVisit, headless, independent of native history
     expect(await getAllVisits()).toEqual([]);
   });
 
+  it('does not inspect or persist browsing data before privacy consent', async () => {
+    const settings = normalizeSettings({ captureEnabled: true, privacyConsentVersion: 0 });
+    expect(await runRecordNavigation(
+      nav({ url: 'https://private.example/page', tabId: 1, timeStamp: T0 }),
+      settings,
+    )).toBeNull();
+    expect(await runRecordPageContent({
+      url: 'https://private.example/page',
+      title: 'Private',
+      content: 'must not be indexed',
+      capturedAt: T0,
+    }, settings)).toBeNull();
+    expect(await runRecordEngagement(1, [
+      { type: 'focus', timestamp: T0 },
+      { type: 'blur', timestamp: T0 + 1000 },
+    ], settings, 'https://private.example/page')).toBeNull();
+    expect(await getAllVisits()).toEqual([]);
+  });
+
   it('does not record visits from excluded hosts or their subdomains', async () => {
     const settings = normalizeSettings({ excludedHosts: ['example.com'] });
     const result = await recordNavigation(
@@ -96,6 +143,18 @@ describe('capture pipeline (recordVisit, headless, independent of native history
     );
     expect(result).toBeNull();
     expect(await getAllVisits()).toEqual([]);
+  });
+
+  it('does not store page content from non-web URLs', async () => {
+    const page = await recordPageContent({
+      url: 'file:///Users/example/private-notes.txt',
+      title: 'Private notes',
+      content: 'must not be stored',
+      capturedAt: Date.now(),
+    }, CONSENTED_SETTINGS);
+
+    expect(page).toBeNull();
+    expect(await getDB().pages.count()).toBe(0);
   });
 
   it('full-text content search finds pages by their body text', async () => {

@@ -4,6 +4,20 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-08-08
+
+### Added
+- Privacy-first onboarding with a prominent disclosure and affirmative consent
+  before browsing activity, visible page text, or engagement data is handled.
+- Immediate capture-state updates for open tabs and safe capture-off defaults
+  for new installations.
+
+### Changed
+- Renamed the public extension to Better Browser History and refined its concise
+  Chrome Web Store summary.
+- Removed unnecessary web-accessible resource exposure from the production
+  manifest.
+
 ## [1.2.1] - 2026-08-08
 
 ### Fixed
@@ -94,3 +108,4 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 [1.1.3]: https://github.com/arhxam/better-browser-history/compare/v1.1.2...v1.1.3
 [1.2.0]: https://github.com/arhxam/better-browser-history/compare/v1.1.3...v1.2.0
 [1.2.1]: https://github.com/arhxam/better-browser-history/compare/v1.2.0...v1.2.1
+[1.3.0]: https://github.com/arhxam/better-browser-history/compare/v1.2.1...v1.3.0

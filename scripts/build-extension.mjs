@@ -39,7 +39,6 @@ async function run() {
           dashboard: resolve(root, 'src/ui/dashboard.html'),
           popup: resolve(root, 'src/ui/popup.html'),
           history: resolve(root, 'src/ui/history.html'),
-          newtab: resolve(root, 'src/ui/newtab.html'),
           options: resolve(root, 'src/ui/options.html'),
         },
       },
