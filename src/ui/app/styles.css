@@ -279,6 +279,19 @@ button { font-family: inherit; cursor: pointer; }
 .options-status.error { background: #fef2f2; color: #991b1b; }
 .options .panel h3 { margin-bottom: 6px; }
 .options .panel { padding: 20px 22px; }
+.privacy-consent {
+  border: 1px solid #d4d4d8; background: #fff; box-shadow: 0 16px 42px rgba(24,24,27,.08);
+}
+.privacy-kicker { margin-bottom: 8px; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.privacy-consent h2 { margin: 0 0 10px; font-size: 19px; letter-spacing: -.025em; }
+.privacy-consent p { margin: 0 0 10px; color: var(--muted); font-size: 13px; line-height: 1.65; }
+.privacy-consent .privacy-detail { color: var(--foreground); font-weight: 550; }
+.privacy-consent .options-actions { margin: 18px 0 12px; }
+.privacy-link { color: var(--foreground); font-size: 12px; font-weight: 600; text-underline-offset: 3px; }
+.privacy-promise { display: flex; align-items: center; justify-content: space-between; gap: 18px; background: #f4f4f5; }
+.privacy-promise strong, .privacy-promise span { display: block; }
+.privacy-promise strong { font-size: 13px; }
+.privacy-promise span { margin-top: 3px; color: var(--muted); font-size: 12px; }
 .storage-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 0; }
 .setting-list { display: flex; flex-direction: column; }
 .setting-row {
@@ -289,6 +302,8 @@ button { font-family: inherit; cursor: pointer; }
 .setting-name { display: block; font-size: 13.5px; font-weight: 550; }
 .setting-description { display: block; color: var(--faint); font-size: 12px; margin-top: 2px; }
 .switch { width: 34px; height: 19px; accent-color: var(--primary); flex: 0 0 auto; }
+.switch:disabled { cursor: not-allowed; opacity: .45; }
+.setting-row:has(.switch:disabled) { cursor: not-allowed; opacity: .62; }
 .textarea {
   display: block; width: 100%; resize: vertical; min-height: 104px; padding: 11px 12px;
   border: none; outline: none; border-radius: var(--radius-sm); background: var(--surface-2);
@@ -306,6 +321,7 @@ button { font-family: inherit; cursor: pointer; }
   .field-grid { grid-template-columns: 1fr; }
   .storage-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .options { padding: 28px 16px 48px; }
+  .privacy-promise { align-items: flex-start; flex-direction: column; }
 }
 
 @media (max-width: 900px) {

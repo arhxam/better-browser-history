@@ -15,6 +15,11 @@ import type {
   ExtensionSettings,
   RetentionDays,
 } from '../../settings/settings';
+import {
+  CURRENT_PRIVACY_CONSENT_VERSION,
+} from '../../settings/settings';
+import type { ContentMessage } from '../../shared/messages';
+import { CONSENT_BUTTON_LABEL, PRIVACY_DISCLOSURE } from './privacy-copy';
 
 const RETENTION_OPTIONS: { label: string; days: RetentionDays }[] = [
   { label: 'Keep everything', days: 0 },
@@ -28,11 +33,13 @@ function SettingToggle({
   label,
   description,
   checked,
+  disabled = false,
   onChange,
 }: {
   label: string;
   description: string;
   checked: boolean;
+  disabled?: boolean;
   onChange: (checked: boolean) => void;
 }) {
   return (
@@ -45,6 +52,7 @@ function SettingToggle({
         className="switch"
         type="checkbox"
         checked={checked}
+        disabled={disabled}
         onChange={(event) => onChange(event.target.checked)}
       />
     </label>
@@ -85,6 +93,10 @@ export function Options() {
     try {
       const next = await setSettings({ ...settings, ...patch });
       setLocalSettings(next);
+      if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
+        await chrome.runtime.sendMessage({ type: 'SET_CAPTURE_STATE' } satisfies ContentMessage)
+          .catch(() => undefined);
+      }
       showMessage(message);
     } catch (error) {
       showError(error);
@@ -154,6 +166,14 @@ export function Options() {
   }
 
   if (!settings) return <div className="loading">Loading settings…</div>;
+  const hasConsent = settings.privacyConsentVersion >= CURRENT_PRIVACY_CONSENT_VERSION;
+
+  async function enablePrivateHistory() {
+    await save({
+      privacyConsentVersion: CURRENT_PRIVACY_CONSENT_VERSION,
+      captureEnabled: true,
+    }, 'Private history capture is enabled.');
+  }
 
   return (
     <div className="options">
@@ -164,6 +184,36 @@ export function Options() {
           <p className="options-sub">Private, local controls for how your history is captured and shown</p>
         </div>
       </header>
+
+      {!hasConsent ? (
+        <section className="privacy-consent panel" role="dialog" aria-labelledby="privacy-consent-title" aria-describedby="privacy-consent-copy">
+          <div className="privacy-kicker">Your choice comes first</div>
+          <h2 id="privacy-consent-title">Enable private browser history?</h2>
+          <p id="privacy-consent-copy">{PRIVACY_DISCLOSURE}</p>
+          <p className="privacy-detail">
+            Nothing is uploaded. Capture remains off unless you choose to enable it.
+          </p>
+          <div className="options-actions">
+            <button className="btn" onClick={() => void enablePrivateHistory()}>{CONSENT_BUTTON_LABEL}</button>
+            <button className="btn ghost" onClick={() => void save({ captureEnabled: false }, 'Capture remains off.')}>
+              Keep capture off
+            </button>
+          </div>
+          <a className="privacy-link" href="https://arhxam.github.io/better-browser-history/privacy.html" target="_blank" rel="noreferrer">
+            Read the complete privacy policy
+          </a>
+        </section>
+      ) : (
+        <section className="privacy-promise panel" aria-label="Local data promise">
+          <div>
+            <strong>Local data promise</strong>
+            <span>Browsing data stays on this device and is never sold or shared.</span>
+          </div>
+          <a className="privacy-link" href="https://arhxam.github.io/better-browser-history/privacy.html" target="_blank" rel="noreferrer">
+            Privacy policy
+          </a>
+        </section>
+      )}
 
       <section className="panel">
         <h3>Storage</h3>
@@ -185,18 +235,21 @@ export function Options() {
             label="Record browsing history"
             description="Master switch for all new history capture."
             checked={settings.captureEnabled}
+            disabled={!hasConsent}
             onChange={(captureEnabled) => void save({ captureEnabled })}
           />
           <SettingToggle
             label="Index page content"
             description="Store visible page text so search can find more than titles and URLs."
             checked={settings.indexPageContent}
+            disabled={!hasConsent}
             onChange={(indexPageContent) => void save({ indexPageContent })}
           />
           <SettingToggle
             label="Track engagement"
             description="Measure active time and scroll depth; idle time is excluded."
             checked={settings.trackEngagement}
+            disabled={!hasConsent}
             onChange={(trackEngagement) => void save({ trackEngagement })}
           />
         </div>

@@ -15,7 +15,28 @@ export interface EngagementMessage {
   events: EngagementEvent[];
 }
 
-export type ContentMessage = PageContentMessage | EngagementMessage;
+export interface GetCaptureStateMessage {
+  type: 'GET_CAPTURE_STATE';
+}
+
+export interface SetCaptureStateMessage {
+  type: 'SET_CAPTURE_STATE';
+}
+
+export interface CaptureStateMessage {
+  type: 'CAPTURE_STATE';
+  enabled: boolean;
+}
+
+export interface CaptureStateResponse {
+  enabled: boolean;
+}
+
+export type ContentMessage = PageContentMessage
+  | EngagementMessage
+  | GetCaptureStateMessage
+  | SetCaptureStateMessage
+  | CaptureStateMessage;
 
 // UI <-> service worker query bridge (used when running as an extension page;
 // the dev/demo UI talks to IndexedDB directly instead).

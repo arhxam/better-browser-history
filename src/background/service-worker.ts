@@ -13,6 +13,10 @@ import {
 import { getDB } from '../db/schema';
 import { getSettings, pruneBefore, setSettings } from '../db/repository';
 import type { ContentMessage } from '../shared/messages';
+import {
+  CURRENT_PRIVACY_CONSENT_VERSION,
+  canCapture,
+} from '../settings/settings';
 
 const IDLE_SECONDS = 60;
 const PRUNE_ALARM = 'bbh-prune';
@@ -30,6 +34,8 @@ async function getOpenerTabId(tabId: number): Promise<number | undefined> {
 
 async function handleNavigation(details: chrome.webNavigation.WebNavigationTransitionCallbackDetails) {
   if (details.frameId !== 0) return;
+  const settings = await getSettings();
+  if (!canCapture(settings)) return;
   let title: string | undefined;
   try {
     title = (await chrome.tabs.get(details.tabId)).title;
@@ -45,16 +51,31 @@ async function handleNavigation(details: chrome.webNavigation.WebNavigationTrans
     title,
     openerTabId: await getOpenerTabId(details.tabId),
   };
-  await recordNavigation(ev, await getSettings());
+  await recordNavigation(ev, settings);
 }
 
 chrome.webNavigation.onCommitted.addListener((d) => void handleNavigation(d));
 chrome.webNavigation.onHistoryStateUpdated.addListener((d) => void handleNavigation(d));
 
 // Content script messages (writes only).
-chrome.runtime.onMessage.addListener((msg: ContentMessage, sender) => {
+async function broadcastCaptureState(): Promise<void> {
+  const enabled = canCapture(await getSettings());
+  const tabs = await chrome.tabs.query({});
+  await Promise.all(tabs.map(async (tab) => {
+    if (tab.id == null || !/^https?:\/\//i.test(tab.url ?? '')) return;
+    await chrome.tabs.sendMessage(tab.id, { type: 'CAPTURE_STATE', enabled } satisfies ContentMessage)
+      .catch(() => undefined);
+  }));
+}
+
+chrome.runtime.onMessage.addListener((msg: ContentMessage, sender, sendResponse) => {
   const tabId = sender.tab?.id;
-  if (msg.type === 'PAGE_CONTENT') {
+  if (msg.type === 'GET_CAPTURE_STATE') {
+    void getSettings().then((settings) => sendResponse({ enabled: canCapture(settings) }));
+    return true;
+  } else if (msg.type === 'SET_CAPTURE_STATE' && sender.id === chrome.runtime.id) {
+    void broadcastCaptureState();
+  } else if (msg.type === 'PAGE_CONTENT') {
     void getSettings().then((settings) => recordPageContent({
         url: msg.url,
         title: msg.title,
@@ -87,13 +108,16 @@ chrome.idle.setDetectionInterval(IDLE_SECONDS);
 chrome.idle.onStateChanged.addListener((state) => {
   if (activeTabId == null) return;
   const type = state === 'active' ? 'active' : 'idle';
-  void Promise.all([getSettings(), chrome.tabs.get(activeTabId).catch(() => undefined)])
-    .then(([settings, tab]) => recordEngagement(
-      activeTabId!,
-      [{ type, timestamp: Date.now() }],
-      settings,
-      tab?.url,
-    ));
+  void getSettings().then(async (settings) => {
+    if (!canCapture(settings)) return;
+    const tab = await chrome.tabs.get(activeTabId!).catch(() => undefined);
+    await recordEngagement(
+        activeTabId!,
+        [{ type, timestamp: Date.now() }],
+        settings,
+        tab?.url,
+      );
+  });
 });
 
 // Retention pruning (opt-in; default keeps everything).
@@ -112,7 +136,11 @@ chrome.runtime.onInstalled.addListener(async () => {
   });
   // Seed sensible defaults if absent.
   const existing = await getDB().meta.get('settings');
-  if (!existing) await setSettings(await getSettings());
+  const settings = await getSettings();
+  if (!existing) await setSettings(settings);
+  if (settings.privacyConsentVersion < CURRENT_PRIVACY_CONSENT_VERSION) {
+    await chrome.runtime.openOptionsPage();
+  }
 });
 
 chrome.contextMenus.onClicked.addListener((info) => {
