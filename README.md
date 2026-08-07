@@ -5,6 +5,11 @@
 
 A local-first, **deterministic** history layer for Chromium browsers (Chrome, Brave, Edge).
 
+[Product site](https://arhxam.github.io/better-browser-history/) ·
+[Privacy policy](https://arhxam.github.io/better-browser-history/privacy.html) ·
+[Support](https://arhxam.github.io/better-browser-history/support.html) ·
+[Releases](https://github.com/arhxam/better-browser-history/releases)
+
 Brave (and any browser set to clear history on exit) can leave you with no usable
 history at all. This extension keeps its **own** history in local IndexedDB — captured
 independently of the browser's native store — and builds a richer understanding on top
@@ -36,8 +41,8 @@ no network calls, no randomness. The same visits always produce the same views.
 
 ## Install (load unpacked)
 
-This extension is meant to be loaded unpacked (it requests broad permissions and is not
-published to the Web Store).
+Until the Chrome Web Store listing is approved, install the reviewed release package
+locally or load the production build unpacked.
 
 1. Build it:
    ```bash
@@ -49,7 +54,8 @@ published to the Web Store).
    - Chrome / Brave / Edge: go to **`chrome://extensions`** (Brave: `brave://extensions`).
 3. Turn on **Developer mode** (top‑right toggle).
 4. Click **Load unpacked** and select the `dist/` folder.
-5. The extension starts capturing immediately. Open the toolbar icon for the popup, or
+5. Review the privacy disclosure and explicitly enable private history if you want capture.
+   Open the toolbar icon for the popup, or
    visit **`brave://history`** / **`chrome://history`** for the full dashboard. Your normal
    New Tab page is not changed.
 
@@ -81,20 +87,21 @@ The manifest uses an exact least-privilege permission allowlist:
 | Permission | Why |
 |---|---|
 | `<all_urls>` host access + `content_scripts` | capture page content and engagement on every site |
-| `webNavigation`, `tabs` | record top-level navigations and resolve tab-opener journeys |
+| `webNavigation` | record top-level navigations; matching host access lets the extension resolve tab-opener journeys without the broader `tabs` permission |
 | `unlimitedStorage` | keep the local IndexedDB history from being evicted under normal quota pressure |
 | `idle` | exclude away‑from‑keyboard time from dwell |
 | `alarms` | periodic retention pruning (off by default) |
 | `contextMenus` | open the dashboard from the extension action context menu |
 
-The extension does not request the browser `history`, `storage`, `scripting`, or `favicon`
-permissions. It does not replace New Tab, homepage, search, startup pages, or bookmarks.
+The extension does not request the browser `tabs`, `history`, `storage`, `scripting`, or
+`favicon` permissions. It does not replace New Tab, homepage, search, startup pages, or bookmarks.
 
 ## Privacy
 
-All data lives in the extension's local IndexedDB. There are no analytics, no telemetry,
-and no outbound requests for your history data — the code contains no calls to remote
-origins for stored data. You can clear or export everything from the dashboard.
+Capture is off until the user accepts the in-product disclosure. Once enabled, all data
+lives in the extension's local IndexedDB. There are no analytics, no telemetry, and no
+outbound requests for history data. You can pause, clear, exclude sites, or export data
+from Settings. Read the full [privacy policy](https://arhxam.github.io/better-browser-history/privacy.html).
 
 ## Development
 
