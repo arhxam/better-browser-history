@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   getEntries,
   searchEntries,
@@ -14,6 +14,7 @@ import {
   type SessionView,
 } from '../../db/repository';
 import type { Journey } from '../../core/types';
+import { historyErrorMessage } from './history-error';
 
 export interface HistoryState {
   query: string;
@@ -27,6 +28,7 @@ export interface HistoryState {
   hosts: string[];
   tags: string[];
   loading: boolean;
+  error: string | null;
   reload: () => Promise<void>;
   toggleStar: (url: string, starred: boolean) => Promise<void>;
   saveAnnotation: (url: string, tags: string[], note: string, starred: boolean) => Promise<void>;
@@ -42,26 +44,36 @@ export function useHistory(initialFilter: HistoryFilter = {}): HistoryState {
   const [hosts, setHosts] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const requestGeneration = useRef(0);
 
   const reload = useCallback(async () => {
+    const generation = ++requestGeneration.current;
     setLoading(true);
-    const tz = -new Date().getTimezoneOffset(); // minutes east of UTC
-    const q = query.trim();
-    const [e, a, s, j, h, t] = await Promise.all([
-      q ? searchEntries(q, filter) : getEntries(filter),
-      getAnalytics(filter, tz),
-      getSessions(filter),
-      getJourneys(filter),
-      getAllHosts(),
-      getAllTags(),
-    ]);
-    setEntries(e);
-    setAnalytics(a);
-    setSessions(s);
-    setJourneys(j);
-    setHosts(h);
-    setTags(t);
-    setLoading(false);
+    setError(null);
+    try {
+      const tz = -new Date().getTimezoneOffset(); // minutes east of UTC
+      const q = query.trim();
+      const [e, a, s, j, h, t] = await Promise.all([
+        q ? searchEntries(q, filter) : getEntries(filter),
+        getAnalytics(filter, tz),
+        getSessions(filter),
+        getJourneys(filter),
+        getAllHosts(),
+        getAllTags(),
+      ]);
+      if (generation !== requestGeneration.current) return;
+      setEntries(e);
+      setAnalytics(a);
+      setSessions(s);
+      setJourneys(j);
+      setHosts(h);
+      setTags(t);
+    } catch (cause) {
+      if (generation === requestGeneration.current) setError(historyErrorMessage(cause));
+    } finally {
+      if (generation === requestGeneration.current) setLoading(false);
+    }
   }, [query, filter]);
 
   useEffect(() => {
@@ -96,6 +108,7 @@ export function useHistory(initialFilter: HistoryFilter = {}): HistoryState {
     hosts,
     tags,
     loading,
+    error,
     reload,
     toggleStar,
     saveAnnotation,
