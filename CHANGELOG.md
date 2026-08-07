@@ -4,6 +4,25 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-08-08
+
+### Added
+- Active-time analytics with measured foreground/non-idle time, measurement coverage,
+  site and category percentages, daily activity, a weekday/hour heatmap, top engaged
+  pages, and session-behavior metrics.
+- Accessible dependency-free SVG/CSS charts with visible values, descriptive labels,
+  deterministic empty states, responsive layouts, and reduced-motion support.
+- Retryable history-loading errors and stale-request protection for rapid filter changes.
+
+### Changed
+- Reduced the extension to an exact least-privilege allowlist: `tabs`, `webNavigation`,
+  `unlimitedStorage`, `idle`, `alarms`, and `contextMenus`.
+- Removed unused `history`, `storage`, `scripting`, and `favicon` permissions.
+
+### Fixed
+- Removed the automatic legacy New Tab recovery loop. The compatibility page is now
+  static and cannot reload the extension or create/remove tabs.
+
 ## [1.1.3] - 2026-08-07
 
 ### Fixed
@@ -66,3 +85,4 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 [1.1.1]: https://github.com/arhxam/better-browser-history/compare/v1.1.0...v1.1.1
 [1.1.2]: https://github.com/arhxam/better-browser-history/compare/v1.1.1...v1.1.2
 [1.1.3]: https://github.com/arhxam/better-browser-history/compare/v1.1.2...v1.1.3
+[1.2.0]: https://github.com/arhxam/better-browser-history/compare/v1.1.3...v1.2.0

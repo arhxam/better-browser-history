@@ -23,7 +23,9 @@ Everything stays on your device. Nothing is ever sent anywhere.
 - **Sessions** — visits grouped into browsing sessions by a 30‑minute inactivity gap.
 - **Journeys** — navigation trees reconstructed from referrer links and tab‑opener relationships.
 - **Smart dedup** — repeat visits to the same URL collapse into one entry with a visit count.
-- **Analytics** — top sites, activity‑by‑hour heatmap, per‑day trend, and category breakdown.
+- **Active-time analytics** — precise foreground/non-idle time shares by site and category,
+  measurement coverage, daily trends, a weekday/hour heatmap, top engaged pages, and session behavior.
+- **Visit analytics** — top sites, visits-by-hour, per-day trends, and deterministic categories.
 - **Tags, notes & stars** — annotate and filter your history.
 - **Native History integration** — `brave://history` / `chrome://history` opens the full dashboard; New Tab remains untouched.
 - **Three surfaces** — the browser **History page**, a full-page **dashboard**, and a toolbar **popup**.
@@ -74,17 +76,19 @@ Conductor workspace because that directory can move or be removed.
 
 ## Permissions (and why)
 
-Requested broad because it runs unpacked and needs to observe all browsing:
+The manifest uses an exact least-privilege permission allowlist:
 
 | Permission | Why |
 |---|---|
 | `<all_urls>` host access + `content_scripts` | capture page content and engagement on every site |
-| `webNavigation`, `tabs` | record every navigation and resolve tab‑opener journeys |
-| `history` | optional backfill / parity with the native store |
-| `storage`, `unlimitedStorage` | keep a large local history in IndexedDB |
+| `webNavigation`, `tabs` | record top-level navigations and resolve tab-opener journeys |
+| `unlimitedStorage` | keep the local IndexedDB history from being evicted under normal quota pressure |
 | `idle` | exclude away‑from‑keyboard time from dwell |
 | `alarms` | periodic retention pruning (off by default) |
-| `scripting`, `contextMenus`, `favicon` | supporting UX |
+| `contextMenus` | open the dashboard from the extension action context menu |
+
+The extension does not request the browser `history`, `storage`, `scripting`, or `favicon`
+permissions. It does not replace New Tab, homepage, search, startup pages, or bookmarks.
 
 ## Privacy
 
