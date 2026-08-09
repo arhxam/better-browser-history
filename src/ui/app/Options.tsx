@@ -199,7 +199,7 @@ export function Options() {
               Keep capture off
             </button>
           </div>
-          <a className="privacy-link" href="https://arhxam.github.io/better-browser-history/privacy.html" target="_blank" rel="noreferrer">
+          <a className="privacy-link" href="https://better-browsing-history.opengrounds.org/privacy.html" target="_blank" rel="noreferrer">
             Read the complete privacy policy
           </a>
         </section>
@@ -209,7 +209,7 @@ export function Options() {
             <strong>Local data promise</strong>
             <span>Browsing data stays on this device and is never sold or shared.</span>
           </div>
-          <a className="privacy-link" href="https://arhxam.github.io/better-browser-history/privacy.html" target="_blank" rel="noreferrer">
+          <a className="privacy-link" href="https://better-browsing-history.opengrounds.org/privacy.html" target="_blank" rel="noreferrer">
             Privacy policy
           </a>
         </section>

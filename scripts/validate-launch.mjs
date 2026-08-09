@@ -27,7 +27,7 @@ for (const page of publicPages) {
   const html = read(page).toString('utf8');
   assert(/<title>[^<]+<\/title>/.test(html), `${page} must have a title`);
   assert(/<meta name="description" content="[^"]+">/.test(html), `${page} must have a meta description`);
-  assert(/<link rel="canonical" href="https:\/\/arhxam\.github\.io\/better-browser-history\//.test(html), `${page} must use the public canonical origin`);
+  assert(/<link rel="canonical" href="https:\/\/better-browsing-history\.opengrounds\.org\//.test(html), `${page} must use the public canonical origin`);
   assert(!/<script[^>]+src=["']https?:\/\//i.test(html), `${page} must not load remote scripts`);
 }
 

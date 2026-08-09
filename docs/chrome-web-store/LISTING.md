@@ -1,6 +1,6 @@
 # Chrome Web Store Listing Copy
 
-This is the canonical listing copy for Better Browser History v1.3.0. Keep the product
+This is the canonical listing copy for Better Browser History v1.3.1. Keep the product
 name and summary identical to `dist/manifest.json`. Do not add repeated keyword lists;
 Chrome treats irrelevant or excessive metadata as spam.
 
@@ -50,10 +50,10 @@ Paste the following text exactly:
 | Category | Workflow & Planning |
 | Language | English |
 | Mature content | No |
-| Homepage URL | https://arhxam.github.io/better-browser-history/ |
-| Support URL | https://arhxam.github.io/better-browser-history/support.html |
-| Privacy policy URL | https://arhxam.github.io/better-browser-history/privacy.html |
-| Official URL | Select the verified GitHub Pages property after Search Console verification; otherwise leave unselected |
+| Homepage URL | https://better-browsing-history.opengrounds.org/ |
+| Support URL | https://better-browsing-history.opengrounds.org/support.html |
+| Privacy policy URL | https://better-browsing-history.opengrounds.org/privacy.html |
+| Official URL | Select the verified `https://better-browsing-history.opengrounds.org/` Search Console property; otherwise leave unselected until verification completes |
 | Promo video | Leave blank |
 
 ## Search positioning

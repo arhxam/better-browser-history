@@ -5,9 +5,9 @@
 
 A local-first, **deterministic** history layer for Chromium browsers (Chrome, Brave, Edge).
 
-[Product site](https://arhxam.github.io/better-browser-history/) ·
-[Privacy policy](https://arhxam.github.io/better-browser-history/privacy.html) ·
-[Support](https://arhxam.github.io/better-browser-history/support.html) ·
+[Product site](https://better-browsing-history.opengrounds.org/) ·
+[Privacy policy](https://better-browsing-history.opengrounds.org/privacy.html) ·
+[Support](https://better-browsing-history.opengrounds.org/support.html) ·
 [Releases](https://github.com/arhxam/better-browser-history/releases)
 
 Brave (and any browser set to clear history on exit) can leave you with no usable
@@ -101,7 +101,7 @@ The extension does not request the browser `tabs`, `history`, `storage`, `script
 Capture is off until the user accepts the in-product disclosure. Once enabled, all data
 lives in the extension's local IndexedDB. There are no analytics, no telemetry, and no
 outbound requests for history data. You can pause, clear, exclude sites, or export data
-from Settings. Read the full [privacy policy](https://arhxam.github.io/better-browser-history/privacy.html).
+from Settings. Read the full [privacy policy](https://better-browsing-history.opengrounds.org/privacy.html).
 
 ## Development
 

@@ -1,6 +1,6 @@
 # Better Browser History: Chrome Web Store Submission Runbook
 
-This runbook covers every launch field for v1.3.0. Use the production archive attached to
+This runbook covers every launch field for v1.3.1. Use the production archive attached to
 the GitHub release, not an unpacked development folder.
 
 ## 1. Account and item setup
@@ -13,8 +13,8 @@ the GitHub release, not an unpacked development folder.
    dashboard requires for the account. Answer those identity/legal questions truthfully;
    they are publisher-specific and cannot be inferred from the extension code.
 5. Select **New item**.
-6. Upload `better-browser-history-v1.3.0.zip` from the v1.3.0 GitHub release.
-7. Confirm the parsed name is **Better Browser History** and version is **1.3.0**.
+6. Upload `better-browser-history-v1.3.1.zip` from the v1.3.1 GitHub release.
+7. Confirm the parsed name is **Better Browser History** and version is **1.3.1**.
 
 ## 2. Store Listing tab
 
@@ -36,9 +36,9 @@ Fill the tab as follows:
 | YouTube video | Leave blank |
 | Small promo tile | Upload `assets/small-promo-440x280.png` |
 | Marquee promo tile | Upload `assets/marquee-promo-1400x560.png` |
-| Homepage URL | https://arhxam.github.io/better-browser-history/ |
-| Support URL | https://arhxam.github.io/better-browser-history/support.html |
-| Official URL | Choose the verified `https://arhxam.github.io/better-browser-history/` Search Console property after verification; if unavailable, leave blank for the first submission |
+| Homepage URL | https://better-browsing-history.opengrounds.org/ |
+| Support URL | https://better-browsing-history.opengrounds.org/support.html |
+| Official URL | Choose the verified `https://better-browsing-history.opengrounds.org/` Search Console property after verification; if unavailable, leave blank until verification is complete |
 | Mature content | No / leave the checkbox off |
 
 The screenshots are real product UI at Chrome's recommended 1280×800 size. Keep them in
@@ -57,7 +57,7 @@ feature absent from the uploaded version.
 5. For each selected data category, choose only **App functionality** (or the current
    equivalent wording for providing the core feature).
 6. Set the privacy policy URL to
-   `https://arhxam.github.io/better-browser-history/privacy.html`.
+   `https://better-browsing-history.opengrounds.org/privacy.html`.
 7. Check all Limited Use certifications listed in `PRIVACY-PRACTICES.md`.
 8. Save the tab and resolve every red validation message before continuing.
 
@@ -87,12 +87,12 @@ If a separate credentials field exists, enter:
 
 If a separate additional-notes field exists, enter:
 
-> All user data remains in the extension's local IndexedDB database. Capture requires affirmative in-product consent. The source and privacy policy are public at https://github.com/arhxam/better-browser-history and https://arhxam.github.io/better-browser-history/privacy.html.
+> All user data remains in the extension's local IndexedDB database. Capture requires affirmative in-product consent. The source and privacy policy are public at https://github.com/arhxam/better-browser-history and https://better-browsing-history.opengrounds.org/privacy.html.
 
 ## 6. Submit for review
 
 1. Re-open every tab and confirm it shows a saved/complete state.
-2. Compare the uploaded version and ZIP filename against **1.3.0**.
+2. Compare the uploaded version and ZIP filename against **1.3.1**.
 3. Select **Submit for review**.
 4. In the confirmation dialog, turn **Publish automatically after review** off / select
    deferred publishing. This gives you a final controlled launch after approval.
@@ -117,12 +117,12 @@ privacy URL or distribution choice.
 ## 8. Search Console and organic discovery
 
 1. Open Google Search Console and add the URL-prefix property
-   `https://arhxam.github.io/better-browser-history/`.
-2. Use Google's recommended HTML-tag verification method if available for GitHub Pages.
+   `https://better-browsing-history.opengrounds.org/`.
+2. Use Google's recommended DNS or HTML-tag verification method.
    Copy the exact verification token into the site's `<head>`, commit, publish, then click
    **Verify**. Do not copy a token from another property.
 3. Submit sitemap URL
-   `https://arhxam.github.io/better-browser-history/sitemap.xml`.
+   `https://better-browsing-history.opengrounds.org/sitemap.xml`.
 4. Request indexing for the homepage, privacy page and support page.
 5. After verification, return to the Store Listing tab and select the verified site in
    **Official URL**.

@@ -90,10 +90,10 @@ describe('manifest takeover safety', () => {
     ]));
   });
 
-  it('builds the v1.3.0 Chrome Web Store manifest', () => {
+  it('builds the v1.3.1 Chrome Web Store manifest', () => {
     const manifest = buildManifest();
     expect(manifest.name).toBe('Better Browser History');
-    expect(manifest.version).toBe('1.3.0');
+    expect(manifest.version).toBe('1.3.1');
     expect(manifest.description.length).toBeLessThanOrEqual(132);
     expect(manifest.web_accessible_resources).toBeUndefined();
   });
