@@ -5,7 +5,7 @@ export function buildManifest() {
   return {
     manifest_version: 3,
     name: 'Better Browser History',
-    version: '1.3.0',
+    version: '1.3.1',
     description:
       'Search and analyze browser history with full-text search, sessions and time insights—all stored locally on your device.',
     // Least-privilege APIs used by capture, retention, and the toolbar action.

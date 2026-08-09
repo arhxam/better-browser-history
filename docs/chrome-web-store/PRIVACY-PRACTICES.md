@@ -1,6 +1,6 @@
 # Chrome Web Store Privacy Practices Answers
 
-Use these answers for Better Browser History v1.3.0. They describe the shipped build and
+Use these answers for Better Browser History v1.3.1. They describe the shipped build and
 must be revised before submission if product behavior changes.
 
 ## Single purpose
@@ -66,7 +66,7 @@ purposes.
 
 ## Required certifications
 
-Check every certification after verifying the uploaded ZIP is v1.3.0:
+Check every certification after verifying the uploaded ZIP is v1.3.1:
 
 - I do not sell or transfer user data to third parties outside approved use cases.
 - I do not use or transfer user data for purposes unrelated to the item's single purpose.
@@ -75,7 +75,7 @@ Check every certification after verifying the uploaded ZIP is v1.3.0:
 
 Privacy policy URL:
 
-`https://arhxam.github.io/better-browser-history/privacy.html`
+`https://better-browsing-history.opengrounds.org/privacy.html`
 
 ## Why local-only data is disclosed
 

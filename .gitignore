@@ -13,3 +13,4 @@ dist/
 .ultragoal/
 .playwright-mcp/
 .conductor/
+.vercel/

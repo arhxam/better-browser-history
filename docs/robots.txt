@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://arhxam.github.io/better-browser-history/sitemap.xml
+Sitemap: https://better-browsing-history.opengrounds.org/sitemap.xml
