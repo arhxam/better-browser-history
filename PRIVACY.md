@@ -2,7 +2,7 @@
 
 The canonical, public privacy policy is:
 
-https://better-browsing-history.opengrounds.org/privacy.html
+https://better-browsing-history.openappsstudio.com/privacy.html
 
 The source for that policy is [`docs/privacy.html`](docs/privacy.html). Better Browser
 History captures nothing until the user affirmatively enables private history. If enabled,

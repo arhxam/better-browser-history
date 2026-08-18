@@ -8,8 +8,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 - Moved the canonical product, support, and privacy URLs to the permanent
-  `better-browsing-history.opengrounds.org` site.
-- Identified Better Browser History as a free Open Grounds Studio project on its
+  `better-browsing-history.openappsstudio.com` site.
+- Identified Better Browser History as a free Open Apps Studio project on its
   public pages. Extension data handling and permissions are unchanged.
 
 ## [1.3.0] - 2026-08-08

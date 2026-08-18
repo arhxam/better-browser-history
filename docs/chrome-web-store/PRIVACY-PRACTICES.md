@@ -75,7 +75,7 @@ Check every certification after verifying the uploaded ZIP is v1.3.1:
 
 Privacy policy URL:
 
-`https://better-browsing-history.opengrounds.org/privacy.html`
+`https://better-browsing-history.openappsstudio.com/privacy.html`
 
 ## Why local-only data is disclosed
 

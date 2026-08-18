@@ -50,10 +50,10 @@ Paste the following text exactly:
 | Category | Workflow & Planning |
 | Language | English |
 | Mature content | No |
-| Homepage URL | https://better-browsing-history.opengrounds.org/ |
-| Support URL | https://better-browsing-history.opengrounds.org/support.html |
-| Privacy policy URL | https://better-browsing-history.opengrounds.org/privacy.html |
-| Official URL | Select the verified `https://better-browsing-history.opengrounds.org/` Search Console property; otherwise leave unselected until verification completes |
+| Homepage URL | https://better-browsing-history.openappsstudio.com/ |
+| Support URL | https://better-browsing-history.openappsstudio.com/support.html |
+| Privacy policy URL | https://better-browsing-history.openappsstudio.com/privacy.html |
+| Official URL | Select the verified `https://better-browsing-history.openappsstudio.com/` Search Console property; otherwise leave unselected until verification completes |
 | Promo video | Leave blank |
 
 ## Search positioning

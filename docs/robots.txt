@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://better-browsing-history.opengrounds.org/sitemap.xml
+Sitemap: https://better-browsing-history.openappsstudio.com/sitemap.xml

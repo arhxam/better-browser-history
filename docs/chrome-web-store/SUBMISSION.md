@@ -36,9 +36,9 @@ Fill the tab as follows:
 | YouTube video | Leave blank |
 | Small promo tile | Upload `assets/small-promo-440x280.png` |
 | Marquee promo tile | Upload `assets/marquee-promo-1400x560.png` |
-| Homepage URL | https://better-browsing-history.opengrounds.org/ |
-| Support URL | https://better-browsing-history.opengrounds.org/support.html |
-| Official URL | Choose the verified `https://better-browsing-history.opengrounds.org/` Search Console property after verification; if unavailable, leave blank until verification is complete |
+| Homepage URL | https://better-browsing-history.openappsstudio.com/ |
+| Support URL | https://better-browsing-history.openappsstudio.com/support.html |
+| Official URL | Choose the verified `https://better-browsing-history.openappsstudio.com/` Search Console property after verification; if unavailable, leave blank until verification is complete |
 | Mature content | No / leave the checkbox off |
 
 The screenshots are real product UI at Chrome's recommended 1280×800 size. Keep them in
@@ -57,7 +57,7 @@ feature absent from the uploaded version.
 5. For each selected data category, choose only **App functionality** (or the current
    equivalent wording for providing the core feature).
 6. Set the privacy policy URL to
-   `https://better-browsing-history.opengrounds.org/privacy.html`.
+   `https://better-browsing-history.openappsstudio.com/privacy.html`.
 7. Check all Limited Use certifications listed in `PRIVACY-PRACTICES.md`.
 8. Save the tab and resolve every red validation message before continuing.
 
@@ -87,7 +87,7 @@ If a separate credentials field exists, enter:
 
 If a separate additional-notes field exists, enter:
 
-> All user data remains in the extension's local IndexedDB database. Capture requires affirmative in-product consent. The source and privacy policy are public at https://github.com/arhxam/better-browser-history and https://better-browsing-history.opengrounds.org/privacy.html.
+> All user data remains in the extension's local IndexedDB database. Capture requires affirmative in-product consent. The source and privacy policy are public at https://github.com/arhxam/better-browser-history and https://better-browsing-history.openappsstudio.com/privacy.html.
 
 ## 6. Submit for review
 
@@ -117,12 +117,12 @@ privacy URL or distribution choice.
 ## 8. Search Console and organic discovery
 
 1. Open Google Search Console and add the URL-prefix property
-   `https://better-browsing-history.opengrounds.org/`.
+   `https://better-browsing-history.openappsstudio.com/`.
 2. Use Google's recommended DNS or HTML-tag verification method.
    Copy the exact verification token into the site's `<head>`, commit, publish, then click
    **Verify**. Do not copy a token from another property.
 3. Submit sitemap URL
-   `https://better-browsing-history.opengrounds.org/sitemap.xml`.
+   `https://better-browsing-history.openappsstudio.com/sitemap.xml`.
 4. Request indexing for the homepage, privacy page and support page.
 5. After verification, return to the Store Listing tab and select the verified site in
    **Official URL**.
