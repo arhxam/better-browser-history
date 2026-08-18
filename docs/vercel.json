@@ -1,6 +1,17 @@
 {
   "redirects": [
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "better-browsing-history.opengrounds.org"
+        }
+      ],
+      "destination": "https://better-browsing-history.openappsstudio.com/",
+      "permanent": true
+    },
+    {
       "source": "/:path*",
       "has": [
         {
